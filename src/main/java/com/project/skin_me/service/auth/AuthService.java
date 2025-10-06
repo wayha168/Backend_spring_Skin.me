@@ -66,7 +66,6 @@ public class AuthService {
                     .body(new ApiResponse("Email already exists", null));
         }
 
-        // Find ROLE_USER from database
         Role userRole = roleRespository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Default role ROLE_USER not found."));
 
@@ -77,7 +76,7 @@ public class AuthService {
         newUser.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         newUser.setConfirmPassword(passwordEncoder.encode(signupRequest.getConfirmPassword()));
 
-        newUser.setRoles(Collections.singleton(userRole)); // assign ROLE_USER
+        newUser.setRoles(Collections.singleton(userRole));
 
         userRepository.save(newUser);
 

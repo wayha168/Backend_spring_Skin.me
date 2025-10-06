@@ -31,7 +31,6 @@ public class CartItemController {
                 User user = userService.getAuthenticatedUser();
                 Cart cart = cartService.initializeNewCart(user);
 
-
             cartItemService.addItemToCart(cart.getId(), productId, quantity);
             return ResponseEntity.ok(new ApiResponse("Add Item success", null));
         } catch (ResourceNotFoundException e) {
