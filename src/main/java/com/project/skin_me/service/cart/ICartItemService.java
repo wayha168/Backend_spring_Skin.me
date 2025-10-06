@@ -1,7 +1,4 @@
-package com.project.skin_me.service.Cart;
-
-import com.project.skin_me.exception.ResourceNotFoundException;
-import com.project.skin_me.model.CartItem;
+package com.project.skin_me.service.cart;
 
 public interface ICartItemService {
     void addItemToCart(Long cartId, Long productId, int quantity);

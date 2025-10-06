@@ -1,4 +1,4 @@
-package com.project.skin_me.service.Cart;
+package com.project.skin_me.service.cart;
 
 import com.project.skin_me.model.Cart;
 import com.project.skin_me.model.User;

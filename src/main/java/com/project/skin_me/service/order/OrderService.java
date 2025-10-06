@@ -9,7 +9,7 @@ import com.project.skin_me.model.OrderItem;
 import com.project.skin_me.model.Product;
 import com.project.skin_me.repository.OrderRepository;
 import com.project.skin_me.repository.ProductRepository;
-import com.project.skin_me.service.Cart.CartService;
+import com.project.skin_me.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;

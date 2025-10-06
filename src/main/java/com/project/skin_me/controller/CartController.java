@@ -3,7 +3,7 @@ package com.project.skin_me.controller;
 import com.project.skin_me.exception.ResourceNotFoundException;
 import com.project.skin_me.model.Cart;
 import com.project.skin_me.response.ApiResponse;
-import com.project.skin_me.service.Cart.ICartService;
+import com.project.skin_me.service.cart.ICartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("${api.prefix}/carts")
-
 public class CartController {
     private final ICartService cartService;
 
