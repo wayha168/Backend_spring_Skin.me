@@ -34,6 +34,8 @@ public class Product {
     private String productType;
     private int inventory;
     private String description;
+    private int totalOrders;
+
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")

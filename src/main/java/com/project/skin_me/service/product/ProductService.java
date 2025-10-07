@@ -169,6 +169,14 @@ public class ProductService implements IProductService {
         return productDto;
     }
 
+    @Override
+    public List<Product> getPopularProducts() {
+        return productRepository.findAll()
+                .stream()
+                .filter(p -> p.getPopularProduct() != null)
+                .toList();
+    }
+
     // @Override
     // public List<Product> getProductsByCategoryAndProductType(String category,
     // String productType) {

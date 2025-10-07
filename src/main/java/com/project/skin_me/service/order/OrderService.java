@@ -5,6 +5,7 @@ import com.project.skin_me.enums.OrderStatus;
 import com.project.skin_me.exception.ResourceNotFoundException;
 import com.project.skin_me.model.*;
 import com.project.skin_me.repository.OrderRepository;
+import com.project.skin_me.repository.PopularProductRepository;
 import com.project.skin_me.repository.ProductRepository;
 import com.project.skin_me.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class OrderService implements IOrderService {
     private final ProductRepository productRepository;
     private final CartService cartService;
     private final ModelMapper modelMapper;
-
+    private final PopularProductRepository popularProductRepository;
 
     @Override
     @Transactional
@@ -92,6 +93,23 @@ public class OrderService implements IOrderService {
     @Override
     public OrderDto convertToDto(Order order) {
         return modelMapper.map(order, OrderDto.class);
+    }
+
+    public void updatePopularProducts(List<OrderItem> items) {
+        for (OrderItem item : items) {
+            Product product = item.getProduct();
+            product.setTotalOrders(product.getTotalOrders() + item.getQuantity());
+
+            // Example rule: if ordered more than 50 times -> mark as popular
+            if (product.getTotalOrders() >= 50 && product.getPopularProduct() == null) {
+                PopularProduct popular = new PopularProduct();
+                popular.setSellRecord(product.getTotalOrders());
+                popularProductRepository.save(popular);
+                product.setPopularProduct(popular);
+            }
+
+            productRepository.save(product);
+        }
     }
 
 }

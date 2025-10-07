@@ -16,6 +16,7 @@ import com.project.skin_me.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -200,6 +201,24 @@ public class ProductController {
             return ResponseEntity.ok(new ApiResponse("Product count!", productsCount));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<ApiResponse> getPopularProducts() {
+        try {
+            List<Product> popularProducts = productService.getPopularProducts();
+            List<ProductDto> convertedProducts = productService.getConvertedProducts(popularProducts);
+
+            if (popularProducts.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse("No popular products found!", null));
+            }
+
+            return ResponseEntity.ok(new ApiResponse("success", convertedProducts));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error retrieving popular products: " + e.getMessage(), null));
         }
     }
 
