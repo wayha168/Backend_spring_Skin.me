@@ -5,11 +5,15 @@ import com.project.skin_me.security.jwt.JwtAuthEntryPoint;
 import com.project.skin_me.security.user.ShopUserDetailsService;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -36,9 +40,12 @@ public class SecurityConfig {
     private final ShopUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint authEntryPoint;
 
-    private static final List<String> SECURED_URLS =
-            List.of("/api/v1/carts/**", "/api/v1/cartItems/**");
+    private static final List<String> SECURED_URLS = List.of(
+            "/api/v1/carts/**",
+            "/api/v1/cartItems/**"
+    );
 
+    // Whitelist Swagger and authentication endpoints
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -47,33 +54,48 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
+    private static final String[] AUTH_WHITELIST = {
+            "/api/v1/auth/**"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
-                                .requestMatchers(SWAGGER_WHITELIST).permitAll()
-
-                                .requestMatchers(SECURED_URLS.toArray(String[]::new)).authenticated()
-
-                                .anyRequest().permitAll()
+                        // Allow Swagger UI
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        // Allow auth endpoints for login/signup
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
+                        // Allow OPTIONS for CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Protect secured endpoints
+                        .requestMatchers(SECURED_URLS.toArray(String[]::new)).authenticated()
+                        // Everything else authenticated
+                        .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(daoAuthenticationProvider());
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
+    // OpenAPI config with JWT support for Swagger
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
                         .title("Skin Me API")
                         .version("1.0")
-                        .description("API documentation for Skin Me project"));
+                        .description("API documentation for Skin Me project"))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 
     @Bean
@@ -92,10 +114,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
-            throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
-
     }
 
     @Bean
@@ -119,6 +139,5 @@ public class SecurityConfig {
             }
         };
     }
-
 
 }

@@ -6,11 +6,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 
 @SpringBootApplication
 @EnableMethodSecurity
-
 public class SkinMeApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SkinMeApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SkinMeApplication.class, args);
+    }
 
 }

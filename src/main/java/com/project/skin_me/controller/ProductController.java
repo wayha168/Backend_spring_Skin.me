@@ -54,7 +54,7 @@ public class ProductController {
 
     }
 
-    @GetMapping("product/by-producttype")
+    @GetMapping("product/by-product-type")
     public ResponseEntity<ApiResponse> findProductsByProductType(@RequestParam String productType) {
         try {
             if (productType == null || productType.isBlank()) {
@@ -179,26 +179,6 @@ public class ProductController {
         }
     }
 
-    // @GetMapping("/by-category-and-type/")
-    // public ResponseEntity<ApiResponse>
-    // getProductsByCategoryAndProductType(@RequestParam String category,
-    // @RequestParam String productType) {
-    // try {
-    // List<Product> products =
-    // productService.getProductsByCategoryAndProductType(category, productType);
-    // if (products.isEmpty()) {
-
-    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("No
-    // product found!", null));
-    // }
-
-    // return ResponseEntity.ok(new ApiResponse("success", products));
-    // } catch (Exception e) {
-    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
-    // ApiResponse(e.getMessage(), null));
-    // }
-    // }
-
     @GetMapping("/product/{category}/all/products")
     public ResponseEntity<ApiResponse> findProductsByCategory(@PathVariable String category) {
         try {
@@ -222,5 +202,25 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
+
+    // @GetMapping("/by-category-and-type/")
+    // public ResponseEntity<ApiResponse>
+    // getProductsByCategoryAndProductType(@RequestParam String category,
+    // @RequestParam String productType) {
+    // try {
+    // List<Product> products =
+    // productService.getProductsByCategoryAndProductType(category, productType);
+    // if (products.isEmpty()) {
+
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("No
+    // product found!", null));
+    // }
+
+    // return ResponseEntity.ok(new ApiResponse("success", products));
+    // } catch (Exception e) {
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
+    // ApiResponse(e.getMessage(), null));
+    // }
+    // }
 
 }
