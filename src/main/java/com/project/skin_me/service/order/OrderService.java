@@ -3,10 +3,7 @@ package com.project.skin_me.service.order;
 import com.project.skin_me.dto.OrderDto;
 import com.project.skin_me.enums.OrderStatus;
 import com.project.skin_me.exception.ResourceNotFoundException;
-import com.project.skin_me.model.Cart;
-import com.project.skin_me.model.Order;
-import com.project.skin_me.model.OrderItem;
-import com.project.skin_me.model.Product;
+import com.project.skin_me.model.*;
 import com.project.skin_me.repository.OrderRepository;
 import com.project.skin_me.repository.ProductRepository;
 import com.project.skin_me.service.cart.CartService;
@@ -46,8 +43,14 @@ public class OrderService implements IOrderService {
     }
 
     private Order createOrder(Cart cart) {
+
+        for (CartItem item : cart.getItems()) {
+            Product product = item.getProduct();
+            if (product.getInventory() < item.getQuantity()) {
+                throw new IllegalArgumentException("Insufficient stock for " + product.getName());            }
+        }
+
         Order order = new Order();
-        //set the user
         order.setUser(cart.getUser());
         order.setOrderStatus(OrderStatus.PENDING);
         order.setOrderDate(LocalDate.now());
@@ -55,6 +58,7 @@ public class OrderService implements IOrderService {
     }
 
     private List<OrderItem> createOrderItems(Order order, Cart cart) {
+        //record order by deduct Inventory and also record
         return cart.getItems().stream().map(cartItem ->  {
                 Product product = cartItem.getProduct();
                 product.setInventory(product.getInventory() - cartItem.getQuantity());

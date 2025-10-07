@@ -24,6 +24,7 @@ public class Order {
     private Long orderId;
     private LocalDate orderDate;
     private BigDecimal orderTotalAmount;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
@@ -34,4 +35,7 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payment;
 }

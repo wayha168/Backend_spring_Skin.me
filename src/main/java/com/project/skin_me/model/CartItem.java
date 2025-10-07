@@ -22,7 +22,7 @@ public class CartItem {
     private BigDecimal totalPrice;
     private double discount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
@@ -34,9 +34,6 @@ public class CartItem {
     public void setTotalPrice() {
         this.totalPrice = this.unitPrice.multiply(new BigDecimal(quantity));
     }
-
-
-
 
 
 }

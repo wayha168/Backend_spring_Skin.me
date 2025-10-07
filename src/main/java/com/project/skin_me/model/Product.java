@@ -3,6 +3,7 @@ package com.project.skin_me.model;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
@@ -41,6 +42,11 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Image> images;
+
+    @ManyToOne
+    @JoinColumn(name = "popular_product_id")
+    @JsonIgnore
+    private PopularProduct popularProduct;
 
     public Product(String name, String brand, BigDecimal price,
             String productType, int inventory, String description, Category category) {
