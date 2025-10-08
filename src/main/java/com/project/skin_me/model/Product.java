@@ -46,7 +46,6 @@ public class Product {
     private List<Image> images;
 
     @ManyToOne
-    @JoinColumn(name = "popular_product_id")
     @JsonIgnore
     private PopularProduct popularProduct;
 

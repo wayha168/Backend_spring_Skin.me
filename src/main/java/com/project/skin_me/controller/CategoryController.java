@@ -1,5 +1,6 @@
 package com.project.skin_me.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +30,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RequestMapping("${api.prefix}/categories")
 public class CategoryController {
 
-    private ICategoryService categoryService;
+    private final ICategoryService categoryService;
 
     @GetMapping("/all-categories")
     public ResponseEntity<ApiResponse> getAllCategories() {
@@ -42,6 +43,7 @@ public class CategoryController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add-category")
     public ResponseEntity<ApiResponse> addCategory(@RequestBody Category name) {
         try {

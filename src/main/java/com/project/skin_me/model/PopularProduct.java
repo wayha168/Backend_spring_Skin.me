@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,8 +18,10 @@ public class PopularProduct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private double sellRecord;
+    private Integer quantitySold;
+    private LocalDateTime lastPurchasedDate;
 
-    @OneToMany(mappedBy = "popularProduct", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
-
+    @OneToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 }
