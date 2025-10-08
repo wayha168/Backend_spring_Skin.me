@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("${api.prefix}/categories")
@@ -35,12 +37,12 @@ public class CategoryController {
             List<Category> categories = categoryService.getAllCategories();
             return ResponseEntity.ok(new ApiResponse("Found!", categories));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Error:", HttpStatus.INTERNAL_SERVER_ERROR));
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error:", INTERNAL_SERVER_ERROR));
         }
     }
 
-    @PostMapping("/addcategory")
+    @PostMapping("/add-category")
     public ResponseEntity<ApiResponse> addCategory(@RequestBody Category name) {
         try {
             Category theCategory = categoryService.addCategory(name);

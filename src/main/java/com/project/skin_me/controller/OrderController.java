@@ -4,11 +4,9 @@ import com.project.skin_me.dto.OrderDto;
 import com.project.skin_me.exception.AlreadyExistsException;
 import com.project.skin_me.exception.ResourceNotFoundException;
 import com.project.skin_me.model.Order;
-import com.project.skin_me.request.UserUpdateRequest;
 import com.project.skin_me.response.ApiResponse;
 import com.project.skin_me.service.order.IOrderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

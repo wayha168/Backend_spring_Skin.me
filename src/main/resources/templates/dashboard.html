@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F3DCD5FF;
+            padding: 20px;
+        }
+        h1 {
+            color: #D4593D;
+            text-align: center;
+        }
+        .dashboard-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #F4BEAE;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+        }
+        form div {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #D4593D;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #D4593D;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #b9452d;
+        }
+        .logout-btn {
+            margin-top: 20px;
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <h1>Admin Dashboard</h1>
+    <p>Welcome, <span th:text="${#authentication.name}">Admin</span></p>
+
+    <h2>Add Product</h2>
+    <form th:action="@{/products/add}" method="post" enctype="multipart/form-data">
+        <div>
+            <label>Name:</label>
+            <input type="text" name="name" required />
+        </div>
+        <div>
+            <label>Category:</label>
+            <input type="text" name="category" required />
+        </div>
+        <div>
+            <label>Brand:</label>
+            <input type="text" name="brand" required />
+        </div>
+        <div>
+            <label>Price:</label>
+            <input type="number" name="price" step="0.01" required />
+        </div>
+        <div>
+            <label>Image:</label>
+            <input type="file" name="imageFile" />
+        </div>
+        <button type="submit">Add Product</button>
+    </form>
+
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="logout-btn">Logout</button>
+    </form>
+</div>
+</body>
+</html>

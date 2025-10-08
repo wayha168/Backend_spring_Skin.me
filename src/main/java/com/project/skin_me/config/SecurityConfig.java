@@ -42,10 +42,31 @@ public class SecurityConfig {
 
     private static final List<String> SECURED_URLS = List.of(
             "/api/v1/carts/**",
-            "/api/v1/cartItems/**"
+            "/api/v1/cartItems/**",
+            "/api/v1/payment/**"
     );
 
-    // Whitelist Swagger and authentication endpoints
+    private static final String[] PUBLIC_PRODUCTS = {
+            "/api/v1/products/**",
+            "/api/v1/popular/**",
+            "/api/v1/categories/**",
+    };
+
+    private static final String[] AUTH_WHITELIST = {
+            "/api/v1/auth/**"
+    };
+
+    private static final String[] ADMIN_URLS = {
+            "/dashboard/**",
+            "/products/add/**"
+    };
+
+    private static final String[] SECURED_API_URLS = {
+            "/api/v1/carts/**",
+            "/api/v1/cartItems/**",
+            "/api/v1/payment/**"
+    };
+
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -54,27 +75,31 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
-    private static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/**"
-    };
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+                .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Allow Swagger UI
+                        // Swagger and public endpoints
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                        // Allow auth endpoints for login/signup
                         .requestMatchers(AUTH_WHITELIST).permitAll()
-                        // Allow OPTIONS for CORS preflight
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Protect secured endpoints
-                        .requestMatchers(SECURED_URLS.toArray(String[]::new)).authenticated()
-                        // Everything else authenticated
+                        .requestMatchers(PUBLIC_PRODUCTS).permitAll()
+                        // Admin dashboard
+                        .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
+                        // API endpoints
+                        .requestMatchers(SECURED_API_URLS).authenticated()
+                        // Any other requests
                         .anyRequest().authenticated()
-                );
+                )
+                // Form login for dashboard
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout.permitAll());
 
         http.authenticationProvider(daoAuthenticationProvider());
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);

@@ -28,6 +28,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
+    @Column(name = "stripe_session_id")
+    private String stripeSessionId;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<OrderItem> orderItems = new HashSet<>();
@@ -38,4 +41,8 @@ public class Order {
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Payment payment;
+
+    public Long getId() {
+        return orderId;
+    }
 }

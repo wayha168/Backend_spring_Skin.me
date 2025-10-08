@@ -112,4 +112,9 @@ public class OrderService implements IOrderService {
         }
     }
 
+    @Transactional
+    public void updateOrder(Order order) {
+        orderRepository.save(order);
+    }
+
 }
