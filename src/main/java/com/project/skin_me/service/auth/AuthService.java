@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -87,5 +88,26 @@ public class AuthService {
     public ResponseEntity<ApiResponse> logout() {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(new ApiResponse("Logout successful", null));
+    }
+
+    public ResponseEntity<ApiResponse> resetPassword(String email, String newPassword, String confirmPassword) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(NOT_FOUND)
+                    .body(new ApiResponse("Invalid email", null));
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            return ResponseEntity.status(BAD_REQUEST)
+                    .body(new ApiResponse("Passwords do not match", null));
+        }
+
+        User user = optionalUser.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setConfirmPassword(passwordEncoder.encode(confirmPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new ApiResponse("Password reset successful", null));
     }
 }

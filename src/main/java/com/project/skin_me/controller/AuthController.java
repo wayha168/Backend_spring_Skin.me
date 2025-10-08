@@ -30,4 +30,9 @@ public class AuthController {
     public ResponseEntity<ApiResponse> logout() {
         return authService.logout();
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String email, @RequestParam String password, @RequestParam String confirmPassword) {
+        return authService.resetPassword(email, password, confirmPassword);
+    }
 }
