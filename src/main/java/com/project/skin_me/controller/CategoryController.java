@@ -73,7 +73,7 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/category/{id}/delete")
     public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Long id) {
         try {
@@ -84,6 +84,7 @@ public class CategoryController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/category/{name}/update")
     public ResponseEntity<ApiResponse> updateCategory(@PathVariable Long id, @RequestBody Category category) {
         try {
@@ -95,5 +96,3 @@ public class CategoryController {
     }
 
 }
-
-// 2:18;00 time pause

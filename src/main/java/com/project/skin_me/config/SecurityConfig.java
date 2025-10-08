@@ -8,12 +8,10 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -29,45 +27,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
-
-@EnableWebSecurity
 @Configuration
-@RequiredArgsConstructor
+@EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final ShopUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint authEntryPoint;
 
-    private static final List<String> SECURED_URLS = List.of(
-            "/api/v1/carts/**",
-            "/api/v1/cartItems/**",
-            "/api/v1/payment/**"
-    );
-
-    private static final String[] PUBLIC_PRODUCTS = {
+    private static final String[] PUBLIC_API = {
             "/api/v1/products/**",
             "/api/v1/popular/**",
             "/api/v1/categories/**",
-    };
-
-    private static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/**"
-    };
-
-    private static final String[] ADMIN_URLS = {
-            "/dashboard/**",
-            "/products/add/**"
-    };
-
-    private static final String[] SECURED_API_URLS = {
-            "/api/v1/carts/**",
-            "/api/v1/cartItems/**",
-            "/api/v1/payment/**"
-    };
-
-    private static final String[] SWAGGER_WHITELIST = {
+            "/api/v1/auth/**",
+            "/api/v1/images/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
@@ -75,87 +49,73 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
+    private static final String[] SECURED_API = {
+            "/api/v1/carts/**",
+            "/api/v1/cartItems/**",
+            "/api/v1/payment/**",
+            "/api/v1/order/**"
+    };
+
+    private static final String[] ADMIN_URLS = {
+            "/login", "/admin/**", "/dashboard/**", "/products/add/**"
+    };
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(e -> e.authenticationEntryPoint(authEntryPoint))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger and public endpoints
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                        .requestMatchers(AUTH_WHITELIST).permitAll()
-                        .requestMatchers(PUBLIC_PRODUCTS).permitAll()
-                        // Admin dashboard
+                        .requestMatchers(PUBLIC_API).permitAll()
+                        .requestMatchers("/css/**", "/js/**").permitAll()
                         .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
-                        // API endpoints
-                        .requestMatchers(SECURED_API_URLS).authenticated()
-                        // Any other requests
+                        .requestMatchers(SECURED_API).authenticated()
                         .anyRequest().authenticated()
                 )
-                // Form login for dashboard
                 .formLogin(form -> form
-                        .loginPage("/login")
+                        .loginPage("/login-page")
+                        .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/dashboard", true)
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
-                .logout(logout -> logout.permitAll());
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
+                );
 
-        http.authenticationProvider(daoAuthenticationProvider());
-        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
+        http.authenticationProvider(daoAuthProvider());
+        http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    // OpenAPI config with JWT support for Swagger
+    // 🔒 Beans
     @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Skin Me API")
-                        .version("1.0")
-                        .description("API documentation for Skin Me project"))
-                .components(new Components()
-                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+    public DaoAuthenticationProvider daoAuthProvider() {
+        var provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
+    @Bean public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+
+    @Bean public AuthTokenFilter jwtFilter() { return new AuthTokenFilter(); }
+
+    @Bean public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    @Bean public ModelMapper modelMapper() { return new ModelMapper(); }
 
+    // 🌍 Allow React frontend
     @Bean
-    public AuthTokenFilter authTokenFilter() {
-        return new AuthTokenFilter();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        var authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
+    public WebMvcConfigurer corsConfig() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(@NonNull CorsRegistry registry) {
+            public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:5173")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
@@ -165,4 +125,17 @@ public class SecurityConfig {
         };
     }
 
+    // 📘 Swagger OpenAPI config
+    @Bean
+    public OpenAPI apiDocs() {
+        return new OpenAPI()
+                .info(new Info().title("Skin Me API")
+                        .version("1.0")
+                        .description("API documentation for Skin Me project"))
+                .components(new Components().addSecuritySchemes("bearerAuth",
+                        new SecurityScheme().type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+    }
 }
