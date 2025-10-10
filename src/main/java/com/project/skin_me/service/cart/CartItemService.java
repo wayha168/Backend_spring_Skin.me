@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,36 +30,41 @@ public class CartItemService implements ICartItemService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         Product product = productService.getProductById(productId);
 
-        CartItem cartItem = cart.getItems().stream()
+        Optional<CartItem> cartItemOpt = cart.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
 
-        if (cartItem == null) {
-            cartItem = new CartItem();
+        if (cartItemOpt.isPresent()) {
+            CartItem cartItem = cartItemOpt.get();
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            cartItem.setUnitPrice(product.getPrice());
+            cartItem.setTotalPrice();
+        } else {
+            CartItem cartItem = new CartItem();
             cartItem.setCart(cart);
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
             cartItem.setUnitPrice(product.getPrice());
-            cart.addItem(cartItem);  // new item added to cart
-        } else {
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            cartItem.setTotalPrice();
+            cart.addItem(cartItem);
         }
 
-        cartItem.setTotalPrice(); // calculate total
         recalculateCartTotal(cart);
-        cartRepository.save(cart); // save cart + items (cascade)
-    }
-
-    @Override
-    public void removeItemFromCart(Long cartId, Long productId) {
-        Cart cart = cartService.getCart(cartId);
-        CartItem itemToRemove = getCartItem(cartId, productId);
-        cart.removeItem(itemToRemove);
         cartRepository.save(cart);
     }
 
     @Override
+    @Transactional
+    public void removeItemFromCart(Long cartId, Long productId) {
+        Cart cart = cartService.getCart(cartId);
+        CartItem itemToRemove = getCartItem(cartId, productId);
+        cart.removeItem(itemToRemove);
+        recalculateCartTotal(cart);
+        cartRepository.save(cart);
+    }
+
+    @Override
+    @Transactional
     public void updateItemQuantity(Long cartId, Long productId, int quantity) {
         Cart cart = cartService.getCart(cartId);
         cart.getItems()
@@ -70,14 +76,9 @@ public class CartItemService implements ICartItemService {
                     item.setUnitPrice(item.getProduct().getPrice());
                     item.setTotalPrice();
                 });
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        for (CartItem cartItem : cart.getItems()) {
-            BigDecimal totalPrice = cartItem.getTotalPrice();
-            totalAmount = totalAmount.add(totalPrice);
-        }
-        cart.setTotalAmount(totalAmount);
-        cartRepository.save(cart);
 
+        recalculateCartTotal(cart);
+        cartRepository.save(cart);
     }
 
     public CartItem getCartItem(Long cartId, Long productId) {

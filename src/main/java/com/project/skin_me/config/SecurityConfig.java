@@ -91,7 +91,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🔒 Beans
     @Bean
     public DaoAuthenticationProvider daoAuthProvider() {
         var provider = new DaoAuthenticationProvider();
@@ -125,7 +124,7 @@ public class SecurityConfig {
         };
     }
 
-    // 📘 Swagger OpenAPI config
+    //Swagger OpenAPI config
     @Bean
     public OpenAPI apiDocs() {
         return new OpenAPI()

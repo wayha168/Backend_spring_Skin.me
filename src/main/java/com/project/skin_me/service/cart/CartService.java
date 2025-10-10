@@ -11,19 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
 public class CartService implements ICartService {
 
-    private final CartRepository cartRespository;
-    private final CartItemRepository cartItemRespository;
-    private final AtomicLong cartIdGenerator = new AtomicLong(0);
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
     @Override
     public Cart getCart(Long id) {
-        return cartRespository.findById(id)
+        return cartRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
     }
 
@@ -31,10 +29,9 @@ public class CartService implements ICartService {
     @Transactional
     public void removeCart(Long id) {
         Cart cart = getCart(id);
-        cartItemRespository.deleteByCartId(id);
+        cartItemRepository.deleteByCartId(id);
         cart.getItems().clear();
-        cartRespository.deleteById(id);
-
+        cartRepository.deleteById(id);
     }
 
     @Override
@@ -49,13 +46,13 @@ public class CartService implements ICartService {
                 .orElseGet(() -> {
                     Cart cart = new Cart();
                     cart.setUser(user);
-                    return cartRespository.save(cart);
+                    return cartRepository.save(cart);
                 });
     }
 
     @Override
     public Cart getCartByUserId(Long userId) {
-        return cartRespository.findByUserId(userId);
+        return cartRepository.findByUserId(userId);
     }
 
 }
