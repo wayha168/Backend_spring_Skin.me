@@ -34,23 +34,24 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public  ResponseEntity<ApiResponse> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<ApiResponse> createUser(@RequestBody CreateUserRequest request) {
         try {
-        User user = userService.createUser(request);
-        UserDto userDto = userService.convertUserToDto(user);
-        return ResponseEntity.ok(new ApiResponse("Created!", userDto));
-        }catch (AlreadyExistsException e) {
+            User user = userService.createUser(request);
+            UserDto userDto = userService.convertUserToDto(user);
+            return ResponseEntity.ok(new ApiResponse("Created!", userDto));
+        } catch (AlreadyExistsException e) {
             return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
     @PutMapping("/{userId}/update-users")
-    public ResponseEntity<ApiResponse> updateUserById(@RequestBody UserUpdateRequest request, @PathVariable Long userId ) {
+    public ResponseEntity<ApiResponse> updateUserById(@RequestBody UserUpdateRequest request,
+            @PathVariable Long userId) {
         try {
             User user = userService.updateUser(request, userId);
             UserDto userDto = userService.convertUserToDto(user);
             return ResponseEntity.ok(new ApiResponse("Updated!", userDto));
-        }catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }

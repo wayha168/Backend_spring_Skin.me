@@ -47,7 +47,11 @@ public class AuthService {
             String jwt = jwtUtils.generateTokenForUser(authentication);
             ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
 
-            JwtResponse jwtResponse = new JwtResponse(userDetails.getId(), jwt);
+        java.util.Set<String> roles = userDetails.getAuthorities().stream()
+            .map(a -> a.getAuthority())
+            .collect(java.util.stream.Collectors.toSet());
+
+        JwtResponse jwtResponse = new JwtResponse(userDetails.getId(), jwt, roles);
             return ResponseEntity.ok(new ApiResponse("Login success", jwtResponse));
 
         } catch (AuthenticationException e) {
