@@ -39,19 +39,17 @@ public class AuthService {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getEmail(), loginRequest.getPassword()
-                    )
-            );
+                            loginRequest.getEmail(), loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateTokenForUser(authentication);
             ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
 
-        java.util.Set<String> roles = userDetails.getAuthorities().stream()
-            .map(a -> a.getAuthority())
-            .collect(java.util.stream.Collectors.toSet());
+            java.util.Set<String> roles = userDetails.getAuthorities().stream()
+                    .map(a -> a.getAuthority())
+                    .collect(java.util.stream.Collectors.toSet());
 
-        JwtResponse jwtResponse = new JwtResponse(userDetails.getId(), jwt, roles);
+            JwtResponse jwtResponse = new JwtResponse(userDetails.getId(), jwt, roles);
             return ResponseEntity.ok(new ApiResponse("Login success", jwtResponse));
 
         } catch (AuthenticationException e) {
