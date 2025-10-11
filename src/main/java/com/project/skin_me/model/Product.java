@@ -1,6 +1,7 @@
 package com.project.skin_me.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,7 +37,6 @@ public class Product {
     private String description;
     private int totalOrders;
 
-
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")
     @JsonIgnoreProperties("products")
@@ -48,6 +48,9 @@ public class Product {
     @ManyToOne
     @JsonIgnore
     private PopularProduct popularProduct;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoriteProduct> favoriteUsers = new ArrayList<>();
 
     public Product(String name, String brand, BigDecimal price,
             String productType, int inventory, String description, Category category) {
