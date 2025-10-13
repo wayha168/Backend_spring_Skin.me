@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -53,7 +54,7 @@ public class SecurityConfig {
             "/api/v1/carts/**",
             "/api/v1/cartItems/**",
             "/api/v1/payment/**",
-            "/api/v1/order/**"
+            "/api/v1/orders/**"
     };
 
     private static final String[] ADMIN_URLS = {
@@ -64,6 +65,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors() // Enable CORS
+                .and()
                 .exceptionHandling(e -> e.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -71,23 +74,13 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**").permitAll()
                         .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
                         .requestMatchers(SECURED_API).authenticated()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight requests
                         .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login-page")
-                        .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/dashboard", true)
-                        .failureUrl("/login?error=true")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .permitAll()
                 );
 
         http.authenticationProvider(daoAuthProvider());
         http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -99,17 +92,27 @@ public class SecurityConfig {
         return provider;
     }
 
-    @Bean public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-    @Bean public AuthTokenFilter jwtFilter() { return new AuthTokenFilter(); }
+    @Bean
+    public AuthTokenFilter jwtFilter() {
+        return new AuthTokenFilter();
+    }
 
-    @Bean public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
+    @Bean
+    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    @Bean public ModelMapper modelMapper() { return new ModelMapper(); }
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
-    // 🌍 Allow React frontend
+    // CORS configuration
     @Bean
     public WebMvcConfigurer corsConfig() {
         return new WebMvcConfigurer() {
@@ -124,7 +127,7 @@ public class SecurityConfig {
         };
     }
 
-    //Swagger OpenAPI config
+    // Swagger OpenAPI config
     @Bean
     public OpenAPI apiDocs() {
         return new OpenAPI()
