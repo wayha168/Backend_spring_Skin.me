@@ -39,6 +39,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             }
 
         } catch (JwtException e) {
+            logger.warn("JWT exception: {}");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Invalid or expired token: " + e.getMessage());
             return;
