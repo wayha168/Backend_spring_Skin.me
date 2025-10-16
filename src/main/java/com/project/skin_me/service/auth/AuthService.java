@@ -10,6 +10,8 @@ import com.project.skin_me.response.ApiResponse;
 import com.project.skin_me.response.JwtResponse;
 import com.project.skin_me.security.jwt.JwtUtils;
 import com.project.skin_me.security.user.ShopUserDetails;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,7 +37,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRespository roleRespository;
 
-    public ResponseEntity<ApiResponse> login(LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse> login(LoginRequest loginRequest, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -48,6 +50,14 @@ public class AuthService {
             java.util.Set<String> roles = userDetails.getAuthorities().stream()
                     .map(a -> a.getAuthority())
                     .collect(java.util.stream.Collectors.toSet());
+
+            // Set JWT as HttpOnly cookie
+            Cookie cookie = new Cookie("token", jwt);
+            cookie.setHttpOnly(true);           // prevent JS access
+            cookie.setSecure(true);             // HTTPS only
+            cookie.setPath("/");                // available to whole site
+            cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+            response.addCookie(cookie);
 
             JwtResponse jwtResponse = new JwtResponse(userDetails.getId(), jwt, roles);
             return ResponseEntity.ok(new ApiResponse("Login success", jwtResponse));
