@@ -61,7 +61,7 @@ public class SecurityConfig {
     };
 
     private static final String[] ADMIN_URLS = {
-            "/login", "/admin/**", "/dashboard/**", "/products/add/**"
+            "/dashboard/**", "/products/add/**", "/api/v1/admin/**",
     };
 
     @Bean
@@ -113,17 +113,22 @@ public class SecurityConfig {
         return new ModelMapper();
     }
 
-    // ✅ Centralized CORS configuration (works inside Spring Security)
+    //Centralized CORS configuration (works inside Spring Security)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+
+        // allow both local dev + production domains
         config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
                 "https://skinme.store",
                 "https://www.skinme.store",
-                "https://backend.skinme.store",
-                "https://localhost:3000"));
+                "https://backend.skinme.store"
+        ));
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setExposedHeaders(List.of("Authorization")); // important if JWT in header
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
@@ -132,14 +137,16 @@ public class SecurityConfig {
         return source;
     }
 
-    // ✅ Swagger OpenAPI config
+    // Swagger OpenAPI config
     @Bean
     public OpenAPI apiDocs() {
         return new OpenAPI()
-                .info(new Info().title("Skin Me API")
+                .info(new Info()
+                        .title("Skin Me API")
                         .version("1.0")
                         .description("API documentation for Skin Me project"))
-                .components(new Components().addSecuritySchemes("bearerAuth",
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth",
                         new SecurityScheme().type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")))
