@@ -77,7 +77,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
                         .requestMatchers(SECURED_API).authenticated()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated()
+                );
+
 
         http.authenticationProvider(daoAuthProvider());
         http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -125,6 +127,7 @@ public class SecurityConfig {
                 "https://backend.skinme.store"
         ));
 
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         config.setExposedHeaders(List.of("Authorization"));
@@ -144,11 +147,18 @@ public class SecurityConfig {
                         .title("Skin Me API")
                         .version("1.0")
                         .description("API documentation for Skin Me project"))
+                // Set server URL explicitly to HTTPS
+                .addServersItem(new io.swagger.v3.oas.models.servers.Server()
+                        .url("https://backend.skinme.store")
+                        .description("Production server"))
+                // Security scheme for JWT
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth",
-                        new SecurityScheme().type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")))
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
+
 }
