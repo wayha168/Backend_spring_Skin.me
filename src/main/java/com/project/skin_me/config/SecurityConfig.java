@@ -118,7 +118,6 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // allow both local dev + production domains
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "https://skinme.store",
@@ -128,8 +127,8 @@ public class SecurityConfig {
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        config.setExposedHeaders(List.of("Authorization")); // important if JWT in header
-        config.setAllowCredentials(true);
+        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowCredentials(true);  // very important for JWT cookies
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
