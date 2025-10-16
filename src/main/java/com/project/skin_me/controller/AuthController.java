@@ -4,6 +4,7 @@ import com.project.skin_me.request.LoginRequest;
 import com.project.skin_me.request.SignupRequest;
 import com.project.skin_me.response.ApiResponse;
 import com.project.skin_me.service.auth.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return authService.login(loginRequest);
+    public ResponseEntity<ApiResponse> login(
+            @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletResponse response) {
+        return authService.login(loginRequest, response);
     }
 
     @PostMapping("/signup")
