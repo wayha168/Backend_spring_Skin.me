@@ -38,17 +38,22 @@ public class ProductService implements IProductService {
 
     @Override
     public Product addProduct(AddProductRequest request) {
-        // check if the category is found in DB
 
         if (productExists(request.getBrand(), request.getName())) {
             throw new AlreadyExistsException(request.getBrand() + " " + request.getName() + " already exists, you might need to update");
         }
 
-        Category category = Optional.ofNullable(categoryRepository.findByname(request.getCategory().getName()))
-                .orElseGet(() -> {
-                    Category newCategory = new Category(request.getCategory().getName());
-                    return categoryRepository.save(newCategory);
-                });
+        Category category;
+        if (request.getCategory() != null && request.getCategory().getId() != null) {
+            category = categoryRepository.findById(request.getCategory().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + request.getCategory().getId()));
+        } else if (request.getCategory() != null && request.getCategory().getName() != null) {
+            category = Optional.ofNullable(categoryRepository.findByname(request.getCategory().getName()))
+                    .orElseGet(() -> categoryRepository.save(new Category(request.getCategory().getName())));
+        } else {
+            throw new ResourceNotFoundException("Category information is missing!");
+        }
+
         request.setCategory(category);
         return productRepository.save(createProduct(request, category));
 
