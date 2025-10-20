@@ -4,6 +4,7 @@ import com.project.skin_me.model.Cart;
 import com.project.skin_me.model.User;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface ICartService {
 
@@ -13,4 +14,6 @@ public interface ICartService {
     Cart initializeNewCart(User user);
 
     Cart getCartByUserId(Long userId);
+
+    List<Cart> getAllCarts();
 }
