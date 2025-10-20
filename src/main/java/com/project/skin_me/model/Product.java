@@ -50,6 +50,7 @@ public class Product {
     private PopularProduct popularProduct;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("product")
     private List<FavoriteProduct> favoriteUsers = new ArrayList<>();
 
     public Product(String name, String brand, BigDecimal price,

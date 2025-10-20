@@ -3,13 +3,16 @@ package com.project.skin_me.controller;
 import com.project.skin_me.dto.FavoriteProductDto;
 import com.project.skin_me.exception.AlreadyExistsException;
 import com.project.skin_me.exception.ResourceNotFoundException;
+import com.project.skin_me.model.Product;
 import com.project.skin_me.response.ApiResponse;
 import com.project.skin_me.service.favorite.IFavoriteProductService;
+import com.project.skin_me.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -20,7 +23,9 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 public class FavoriteProductController {
 
     private final IFavoriteProductService favoriteProductService;
+    private final IProductService productService;
 
+    // Add favorite
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addFavorite(@RequestParam Long userId,
                                                    @RequestParam Long productId) {
@@ -40,8 +45,20 @@ public class FavoriteProductController {
     public ResponseEntity<ApiResponse> getFavoritesByUser(@PathVariable Long userId) {
         try {
             List<FavoriteProductDto> favorites = favoriteProductService.getFavoritesByUser(userId);
-            return ResponseEntity.ok(new ApiResponse("Favorites retrieved successfully", favorites));
-        } catch (ResourceNotFoundException e) {
+
+            // Map each favorite to include full product object
+            List<FavoriteProductDto> favoritesWithFullProduct = favorites.stream().map(fav -> {
+                try {
+                    Product product = productService.getProductById(fav.getProductId());
+                    fav.setProduct(product);
+                } catch (Exception e) {
+                    fav.setProduct(null); // fallback
+                }
+                return fav;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(new ApiResponse("Favorites retrieved successfully", favoritesWithFullProduct));
+        } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Oops!", e.getMessage()));
         }
@@ -62,6 +79,18 @@ public class FavoriteProductController {
     @GetMapping("/favorite/all")
     public ResponseEntity<ApiResponse> getAllFavorites() {
         List<FavoriteProductDto> favorites = favoriteProductService.getAllFavorites();
-        return ResponseEntity.ok(new ApiResponse("All favorites retrieved successfully", favorites));
+
+        // Map each favorite to include full product object
+        List<FavoriteProductDto> favoritesWithFullProduct = favorites.stream().map(fav -> {
+            try {
+                Product product = productService.getProductById(fav.getProductId());
+                fav.setProduct(product);
+            } catch (ResourceNotFoundException e) {
+                fav.setProduct(null);
+            }
+            return fav;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(new ApiResponse("All favorites retrieved successfully", favoritesWithFullProduct));
     }
 }
