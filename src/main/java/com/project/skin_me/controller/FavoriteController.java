@@ -7,6 +7,7 @@ import com.project.skin_me.response.ApiResponse;
 import com.project.skin_me.service.favorite.IFavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class FavoriteController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<ApiResponse> getAllFavorites() {
         try {
