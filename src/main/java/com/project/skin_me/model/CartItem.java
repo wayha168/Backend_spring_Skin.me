@@ -1,6 +1,8 @@
 package com.project.skin_me.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +29,8 @@ public class CartItem {
     private Product product;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
+    @JsonIgnoreProperties({"items"})
     @JoinColumn(name = "cart_id")
     @JsonIgnore
     private Cart cart;

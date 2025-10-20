@@ -1,5 +1,6 @@
 package com.project.skin_me.controller;
 
+import com.project.skin_me.dto.CartDto;
 import com.project.skin_me.exception.ResourceNotFoundException;
 import com.project.skin_me.model.Cart;
 import com.project.skin_me.model.User;
@@ -29,11 +30,14 @@ public class CartController {
     @GetMapping("/my-cart")
     public ResponseEntity<ApiResponse> getCart() {
         try {
-            User user = userService.getAuthenticatedUser();
-            Cart cart = cartService.getCartByUserId(user.getId());
-            return ResponseEntity.ok(new ApiResponse("success", cart));
+            var user = userService.getAuthenticatedUser();
+            var cart = cartService.getCartByUserId(user.getId());
+
+            CartDto cartDto = new CartDto(cart);
+            return ResponseEntity.ok(new ApiResponse("success", cartDto));
         } catch (ResourceNotFoundException e) {
-            return  ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(e.getMessage(), null));
         }
     }
 
