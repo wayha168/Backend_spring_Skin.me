@@ -21,7 +21,6 @@ public class FavoriteProductController {
 
     private final IFavoriteProductService favoriteProductService;
 
-    // Add a product to user's favorites
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addFavorite(@RequestParam Long userId,
             @RequestParam Long productId) {
@@ -37,7 +36,7 @@ public class FavoriteProductController {
         }
     }
 
-    // Get all favorite products for a user
+
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse> getFavoritesByUser(@PathVariable Long userId) {
         try {

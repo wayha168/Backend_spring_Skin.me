@@ -122,6 +122,7 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
+                "http://localhost:8800",
                 "https://skinme.store",
                 "https://www.skinme.store",
                 "https://backend.skinme.store"
@@ -151,6 +152,9 @@ public class SecurityConfig {
                 .addServersItem(new io.swagger.v3.oas.models.servers.Server()
                         .url("https://backend.skinme.store")
                         .description("Production server"))
+                .addServersItem(new io.swagger.v3.oas.models.servers.Server()
+                        .url("http://localhost:8800")
+                        .description("Local server"))
                 // Security scheme for JWT
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth",
