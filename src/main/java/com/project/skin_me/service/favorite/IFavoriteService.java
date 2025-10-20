@@ -1,11 +1,10 @@
 package com.project.skin_me.service.favorite;
 
 import com.project.skin_me.dto.FavoriteProductDto;
-import com.project.skin_me.model.FavoriteProduct;
 
 import java.util.List;
 
-public interface IFavoriteProductService {
+public interface IFavoriteService {
 
     FavoriteProductDto addFavorite(Long userId, Long productId);
 
@@ -13,7 +12,7 @@ public interface IFavoriteProductService {
 
     void removeFavorite(Long userId, Long productId);
 
-    FavoriteProductDto convertToDto(FavoriteProduct favoriteProduct);
-    List<FavoriteProductDto> getAllFavorites();
+    FavoriteProductDto convertToDto(Object favoriteItem);
 
+    List<FavoriteProductDto> getAllFavorites();
 }

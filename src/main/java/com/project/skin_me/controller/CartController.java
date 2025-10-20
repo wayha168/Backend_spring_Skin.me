@@ -58,7 +58,7 @@ public class CartController {
     public ResponseEntity<ApiResponse> getTotalAmount(@PathVariable Long cartId) {
         try {
             User user = userService.getAuthenticatedUser();
-            Cart cart = cartService.getCartByUserId(user.getId());
+            cartService.getCartByUserId(user.getId());
             BigDecimal totalPrice = cartService.getTotalPrice(cartId);
             return ResponseEntity.ok(new ApiResponse("total-price", totalPrice));
         } catch (ResourceNotFoundException e) {

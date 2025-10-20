@@ -49,9 +49,9 @@ public class Product {
     @JsonIgnore
     private PopularProduct popularProduct;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("product")
-    private List<FavoriteProduct> favoriteUsers = new ArrayList<>();
+    @ManyToOne
+    @JsonIgnore
+    private User user;
 
     public Product(String name, String brand, BigDecimal price,
             String productType, int inventory, String description, Category category) {
