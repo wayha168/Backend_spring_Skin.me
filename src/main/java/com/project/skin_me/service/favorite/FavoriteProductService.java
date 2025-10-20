@@ -35,15 +35,16 @@ public class FavoriteProductService implements IFavoriteProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
-        // Check for duplicate
+        // Prevent duplicate
         favoriteProductRepository.findByUserAndProduct(user, product)
                 .ifPresent(fav -> {
                     throw new AlreadyExistsException("Product already in favorites");
                 });
 
-        FavoriteProduct favorite = new FavoriteProduct();
-        favorite.setUser(user);
-        favorite.setProduct(product);
+        FavoriteProduct favorite = FavoriteProduct.builder()
+                .user(user)
+                .product(product)
+                .build();
         favoriteProductRepository.save(favorite);
 
         return convertToDto(favorite);
@@ -60,6 +61,13 @@ public class FavoriteProductService implements IFavoriteProductService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<FavoriteProductDto> getAllFavorites() {
+        List<FavoriteProduct> favorites = favoriteProductRepository.findAll();
+        return favorites.stream().map(this::convertToDto).toList();
+    }
+
+    @Override
     @Transactional
     public void removeFavorite(Long userId, Long productId) {
         User user = userRepository.findById(userId)
@@ -72,11 +80,12 @@ public class FavoriteProductService implements IFavoriteProductService {
 
     @Override
     public FavoriteProductDto convertToDto(FavoriteProduct favoriteProduct) {
-        FavoriteProductDto dto = new FavoriteProductDto();
-        dto.setId(favoriteProduct.getId());
-        dto.setUserId(favoriteProduct.getUser().getId());
-        dto.setProductId(favoriteProduct.getProduct().getId());
-        dto.setProductName(favoriteProduct.getProduct().getName());
-        return dto;
+        return FavoriteProductDto.builder()
+                .id(favoriteProduct.getId())
+                .userId(favoriteProduct.getUser().getId())
+                .productId(favoriteProduct.getProduct().getId())
+                .productName(favoriteProduct.getProduct().getName())
+                .productBrand(favoriteProduct.getProduct().getBrand())
+                .build();
     }
 }

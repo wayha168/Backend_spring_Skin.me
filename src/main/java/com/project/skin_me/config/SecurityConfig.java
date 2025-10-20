@@ -55,6 +55,7 @@ public class SecurityConfig {
 
     private static final String[] SECURED_API = {
             "/api/v1/carts/**",
+            "/api/v1/favorites/**",
             "/api/v1/cartItems/**",
             "/api/v1/payment/**",
             "/api/v1/orders/**"

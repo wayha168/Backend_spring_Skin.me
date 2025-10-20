@@ -23,7 +23,7 @@ public class FavoriteProductController {
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addFavorite(@RequestParam Long userId,
-            @RequestParam Long productId) {
+                                                   @RequestParam Long productId) {
         try {
             FavoriteProductDto favoriteDto = favoriteProductService.addFavorite(userId, productId);
             return ResponseEntity.ok(new ApiResponse("Product added to favorites successfully", favoriteDto));
@@ -35,7 +35,6 @@ public class FavoriteProductController {
                     .body(new ApiResponse(e.getMessage(), "Error Occurred!"));
         }
     }
-
 
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse> getFavoritesByUser(@PathVariable Long userId) {
@@ -50,7 +49,7 @@ public class FavoriteProductController {
 
     @DeleteMapping("/remove")
     public ResponseEntity<ApiResponse> removeFavorite(@RequestParam Long userId,
-            @RequestParam Long productId) {
+                                                      @RequestParam Long productId) {
         try {
             favoriteProductService.removeFavorite(userId, productId);
             return ResponseEntity.ok(new ApiResponse("Product removed from favorites successfully", null));
@@ -58,5 +57,11 @@ public class FavoriteProductController {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Oops!", e.getMessage()));
         }
+    }
+
+    @GetMapping("/favorite/all")
+    public ResponseEntity<ApiResponse> getAllFavorites() {
+        List<FavoriteProductDto> favorites = favoriteProductService.getAllFavorites();
+        return ResponseEntity.ok(new ApiResponse("All favorites retrieved successfully", favorites));
     }
 }
