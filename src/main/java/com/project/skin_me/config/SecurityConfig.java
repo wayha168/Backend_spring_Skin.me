@@ -19,7 +19,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,15 +41,20 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_API = {
             "/api/v1/products/**",
-            "/api/v1/popular/**",
             "/api/v1/categories/**",
-            "/api/v1/auth/**",
             "/api/v1/images/**",
+            "/api/v1/payment/webhook",
+            "/api/v1/auth/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/swagger-resources/**",
-            "/webjars/**"
+            "/webjars/**",
+            "/login-page",
+            "/signup",
+            "/reset-password",
+            "/css/**",
+            "/js/**"
     };
 
     private static final String[] SECURED_API = {
@@ -62,25 +66,40 @@ public class SecurityConfig {
     };
 
     private static final String[] ADMIN_URLS = {
-            "/dashboard/**", "/products/add/**", "/api/v1/admin/**",
+            "/dashboard/**",
+            "/products/**",
+            "/categories/**",
+            "/sales/**",
+            "/api/v1/admin/**"
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(e -> e.authenticationEntryPoint(authEntryPoint))
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // Allow sessions for web
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_API).permitAll()
-                        .requestMatchers("/css/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
                         .requestMatchers(SECURED_API).authenticated()
                         .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login-page")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login-page?logout")
+                        .permitAll()
+                )
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**") // Disable CSRF for APIs
                 );
-
 
         http.authenticationProvider(daoAuthProvider());
         http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -116,11 +135,9 @@ public class SecurityConfig {
         return new ModelMapper();
     }
 
-    //Centralized CORS configuration (works inside Spring Security)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:8800",
@@ -128,12 +145,10 @@ public class SecurityConfig {
                 "https://www.skinme.store",
                 "https://backend.skinme.store"
         ));
-
-
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(true);  // very important for JWT cookies
+        config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -141,7 +156,6 @@ public class SecurityConfig {
         return source;
     }
 
-    // Swagger OpenAPI config
     @Bean
     public OpenAPI apiDocs() {
         return new OpenAPI()
@@ -149,14 +163,12 @@ public class SecurityConfig {
                         .title("Skin Me API")
                         .version("1.0")
                         .description("API documentation for Skin Me project"))
-                // Set server URL explicitly to HTTPS
                 .addServersItem(new io.swagger.v3.oas.models.servers.Server()
                         .url("https://backend.skinme.store")
                         .description("Production server"))
                 .addServersItem(new io.swagger.v3.oas.models.servers.Server()
                         .url("http://localhost:8800")
                         .description("Local server"))
-                // Security scheme for JWT
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth",
                                 new SecurityScheme()
@@ -165,5 +177,4 @@ public class SecurityConfig {
                                         .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
-
 }

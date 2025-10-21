@@ -39,3 +39,4 @@ public class AuthController {
         return authService.resetPassword(email, password, confirmPassword);
     }
 }
+

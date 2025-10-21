@@ -31,6 +31,9 @@ public class Order {
     @Column(name = "stripe_session_id")
     private String stripeSessionId;
 
+    @Column(name = "transaction_ref")
+    private String transactionRef;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<OrderItem> orderItems = new HashSet<>();

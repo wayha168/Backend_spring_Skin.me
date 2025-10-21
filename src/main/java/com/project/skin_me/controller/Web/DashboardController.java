@@ -1,6 +1,7 @@
-package com.project.skin_me.controller;
+package com.project.skin_me.controller.Web;
 
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -10,12 +11,13 @@ public class DashboardController {
 
     @GetMapping("/login-page")
     public String loginPage() {
-        return "login"; // Thymeleaf will look for login.html in templates/
+        return "login";
     }
 
     @GetMapping("/dashboard")
+    @PreAuthorize("hasRole('ADMIN')")
     public String dashboardPage() {
-        return "dashboard"; // dashboard.html in templates/
+        return "dashboard";
     }
 
 }

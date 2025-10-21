@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -23,7 +22,6 @@ public class OrderController {
 
     private final IOrderService orderService;
 
-    // User places a new order
     @PostMapping("/order")
     public ResponseEntity<ApiResponse> createOrder(@RequestParam Long userId) {
         try {
@@ -36,31 +34,28 @@ public class OrderController {
         }
     }
 
-    // Get specific order by ID
     @GetMapping("/{orderId}")
     public ResponseEntity<ApiResponse> getOrderById(@PathVariable Long orderId) {
         try {
             OrderDto order = orderService.getOrder(orderId);
             return ResponseEntity.ok(new ApiResponse("Order fetched!", order));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(NOT_FOUND)
                     .body(new ApiResponse("Order not found", e.getMessage()));
         }
     }
 
-    // Get all orders for a specific user
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse> getUserOrders(@PathVariable Long userId) {
         try {
             List<OrderDto> orders = orderService.getUserOrders(userId);
             return ResponseEntity.ok(new ApiResponse("User orders fetched!", orders));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(NOT_FOUND)
                     .body(new ApiResponse("User orders not found", e.getMessage()));
         }
     }
 
-    // Admin: Get all orders
     @GetMapping("/all")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> getAllOrders() {
@@ -68,7 +63,7 @@ public class OrderController {
             List<OrderDto> orders = orderService.getAllUserOrders();
             return ResponseEntity.ok(new ApiResponse("All orders fetched!", orders));
         } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(500)
                     .body(new ApiResponse("Error fetching orders", e.getMessage()));
         }
     }

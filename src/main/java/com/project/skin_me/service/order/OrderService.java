@@ -5,9 +5,11 @@ import com.project.skin_me.enums.OrderStatus;
 import com.project.skin_me.exception.ResourceNotFoundException;
 import com.project.skin_me.model.*;
 import com.project.skin_me.repository.OrderRepository;
+import com.project.skin_me.repository.PaymentRepository;
 import com.project.skin_me.repository.PopularProductRepository;
 import com.project.skin_me.repository.ProductRepository;
-import com.project.skin_me.service.cart.CartService;
+import com.project.skin_me.service.cart.ICartService;
+import com.project.skin_me.service.popularProduct.IPopularProductService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -15,8 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +28,10 @@ public class OrderService implements IOrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-    private final CartService cartService;
+    private final PaymentRepository paymentRepository;
     private final ModelMapper modelMapper;
-    private final PopularProductRepository popularProductRepository;
+    private final ICartService cartService;
+    private final IPopularProductService popularProductService;
 
     @Override
     @Transactional
@@ -38,8 +43,7 @@ public class OrderService implements IOrderService {
         order.setOrderItems(new HashSet<>(orderItemList));
         order.setOrderTotalAmount(calculateTotalAmount(orderItemList));
         Order savedOrder = orderRepository.save(order);
-        cartService.removeCart(cart.getId());
-
+//        cartService.removeCart(cart.getId());
         return  savedOrder;
     }
 
@@ -59,16 +63,13 @@ public class OrderService implements IOrderService {
     }
 
     private List<OrderItem> createOrderItems(Order order, Cart cart) {
-        //record order by deduct Inventory and also record
-        return cart.getItems().stream().map(cartItem ->  {
-                Product product = cartItem.getProduct();
-                product.setInventory(product.getInventory() - cartItem.getQuantity());
-                productRepository.save(product);
-                return new OrderItem(
-                        order,
-                        product,
-                        cartItem.getQuantity(),
-                        cartItem.getUnitPrice());
+        // Do not deduct inventory here; move to payment confirmation
+        return cart.getItems().stream().map(cartItem -> {
+            return new OrderItem(
+                    order,
+                    cartItem.getProduct(),
+                    cartItem.getQuantity(),
+                    cartItem.getUnitPrice());
         }).toList();
     }
 
@@ -101,26 +102,68 @@ public class OrderService implements IOrderService {
         return modelMapper.map(order, OrderDto.class);
     }
 
-    public void updatePopularProducts(List<OrderItem> items) {
-        for (OrderItem item : items) {
-            Product product = item.getProduct();
-            product.setTotalOrders(product.getTotalOrders() + item.getQuantity());
-
-            // Example rule: if ordered more than 50 times -> mark as popular
-            if (product.getTotalOrders() >= 50 && product.getPopularProduct() == null) {
-                PopularProduct popular = new PopularProduct();
-                popular.setSellRecord(product.getTotalOrders());
-                popularProductRepository.save(popular);
-                product.setPopularProduct(popular);
-            }
-
-            productRepository.save(product);
-        }
-    }
+//    public void updatePopularProducts(List<OrderItem> items) {
+//        for (OrderItem item : items) {
+//            Product product = item.getProduct();
+//            product.setTotalOrders(product.getTotalOrders() + item.getQuantity());
+//
+//            // Example rule: if ordered more than 50 times -> mark as popular
+//            if (product.getTotalOrders() >= 50 && product.getPopularProduct() == null) {
+//                PopularProduct popular = new PopularProduct();
+//                popular.setSellRecord(product.getTotalOrders());
+//                popularProductRepository.save(popular);
+//                product.setPopularProduct(popular);
+//            }
+//
+//            productRepository.save(product);
+//        }
+//    }
 
     @Transactional
     public void updateOrder(Order order) {
         orderRepository.save(order);
     }
 
+    @Override
+    public Optional<Order> getOrderByStripeSessionId(String sessionId) {
+        return orderRepository.findByStripeSessionId(sessionId);
+    }
+
+    @Override
+    @Transactional
+    public void confirmOrderPayment(Order order) {
+        if (order.getOrderStatus() != OrderStatus.PENDING && order.getOrderStatus() != OrderStatus.PAYMENT_PENDING) {
+            return; // Already processed or invalid
+        }
+
+        // Deduct inventory
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            if (product.getInventory() < item.getQuantity()) {
+                throw new IllegalArgumentException("Insufficient stock for " + product.getName() + " during confirmation");
+            }
+            product.setInventory(product.getInventory() - item.getQuantity());
+            productRepository.save(product);
+        }
+
+        // Update popular products
+        popularProductService.saveFromOrder(order);
+
+        // Remove cart
+        Cart cart = cartService.getCartByUserId(order.getUser().getId());
+        if (cart != null) {
+            cartService.removeCart(cart.getId());
+        }
+
+        // Update payment record
+        Payment payment = paymentRepository.findByTransactionRef(order.getStripeSessionId())
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found for sessionId: " + order.getStripeSessionId()));
+        payment.setStatus(OrderStatus.SUCCESS);
+        payment.setTransactionTime(LocalDateTime.now());
+        paymentRepository.save(payment);
+
+        // Update order status
+        order.setOrderStatus(OrderStatus.PAID);
+        updateOrder(order);
+    }
 }
