@@ -2,7 +2,7 @@ package com.project.skin_me.data;
 
 import com.project.skin_me.model.Role;
 import com.project.skin_me.model.User;
-import com.project.skin_me.repository.RoleRespository;
+import com.project.skin_me.repository.RoleRepository;
 import com.project.skin_me.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -20,7 +20,7 @@ import java.util.Set;
 public class DataInitializer implements ApplicationListener<ApplicationReadyEvent> {
 
     private final UserRepository userRepository;
-    private final RoleRespository roleRespository;
+    private final RoleRepository roleRespository;
     private final PasswordEncoder passwordEncoder;
 
 

@@ -26,9 +26,15 @@ public class User {
         private String lastName;
 
         @NaturalId
+        @Column(unique = true, nullable = false)
         private String email;
         private String password;
         private String confirmPassword;
+
+        @Column(name = "google_id")
+        private String googleId;
+
+        private boolean enabled = true;
 
         @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
         private Cart cart;
@@ -41,4 +47,7 @@ public class User {
         @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
         private Collection<Role> roles = new HashSet<>();
 
+        @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+        @JoinColumn(name = "favorite_list_id")
+        private FavoriteList favoriteList;
 }

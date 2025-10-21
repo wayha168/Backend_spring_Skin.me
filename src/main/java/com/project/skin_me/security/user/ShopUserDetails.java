@@ -18,8 +18,10 @@ public class ShopUserDetails implements UserDetails {
 
     private Long id;
     private String email;
+    private String firstName;
+    private String lastName;
     private String password;
-
+    private boolean enabled;
     private Collection<GrantedAuthority> authorities;
 
     public static ShopUserDetails buildUserDetails(User user) {
@@ -27,11 +29,15 @@ public class ShopUserDetails implements UserDetails {
                 .stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
-    return new ShopUserDetails(
-            user.getId(),
-            user.getEmail(),
-            user.getPassword(),
-            authorities);
+        return new ShopUserDetails(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPassword(),
+                user.isEnabled(),
+                authorities
+        );
     }
 
     @Override
