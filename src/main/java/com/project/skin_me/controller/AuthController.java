@@ -3,7 +3,6 @@ package com.project.skin_me.controller;
 import com.project.skin_me.request.LoginRequest;
 import com.project.skin_me.request.SignupRequest;
 import com.project.skin_me.response.ApiResponse;
-import com.project.skin_me.service.auth.AuthService;
 import com.project.skin_me.service.auth.IAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -38,9 +37,11 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String email, @RequestParam String password, @RequestParam String confirmPassword) {
+    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String email, @RequestParam String password,
+            @RequestParam String confirmPassword) {
         return authService.resetPassword(email, password, confirmPassword);
     }
+
     @PostMapping("/google")
     public ResponseEntity<ApiResponse> googleLogin(
             @RequestBody Map<String, String> request,
@@ -48,4 +49,3 @@ public class AuthController {
         return authService.googleLogin(request.get("code"), response);
     }
 }
-

@@ -104,8 +104,7 @@ public class AuthService implements IAuthService {
                     googleClientId,
                     googleClientSecret,
                     code,
-                    googleRedirectUri
-            ).execute();
+                    googleRedirectUri).execute();
 
             GoogleIdToken idToken = tokenResponse.parseIdToken();
             GoogleIdToken.Payload payload = idToken.getPayload();
