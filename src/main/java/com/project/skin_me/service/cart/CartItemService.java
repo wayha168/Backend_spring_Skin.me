@@ -4,7 +4,6 @@ import com.project.skin_me.exception.ResourceNotFoundException;
 import com.project.skin_me.model.Cart;
 import com.project.skin_me.model.CartItem;
 import com.project.skin_me.model.Product;
-import com.project.skin_me.repository.CartItemRepository;
 import com.project.skin_me.repository.CartRepository;
 import com.project.skin_me.service.product.IProductService;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CartItemService implements ICartItemService {
 
-    private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
     private final IProductService productService;
     private final ICartService cartService;

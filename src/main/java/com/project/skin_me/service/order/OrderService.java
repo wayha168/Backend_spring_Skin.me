@@ -6,7 +6,6 @@ import com.project.skin_me.exception.ResourceNotFoundException;
 import com.project.skin_me.model.*;
 import com.project.skin_me.repository.OrderRepository;
 import com.project.skin_me.repository.PaymentRepository;
-import com.project.skin_me.repository.PopularProductRepository;
 import com.project.skin_me.repository.ProductRepository;
 import com.project.skin_me.service.cart.ICartService;
 import com.project.skin_me.service.popularProduct.IPopularProductService;
@@ -133,7 +132,7 @@ public class OrderService implements IOrderService {
     @Transactional
     public void confirmOrderPayment(Order order) {
         if (order.getOrderStatus() != OrderStatus.PENDING && order.getOrderStatus() != OrderStatus.PAYMENT_PENDING) {
-            return; // Already processed or invalid
+            return;
         }
 
         // Deduct inventory
@@ -145,16 +144,13 @@ public class OrderService implements IOrderService {
             product.setInventory(product.getInventory() - item.getQuantity());
             productRepository.save(product);
         }
-
         // Update popular products
         popularProductService.saveFromOrder(order);
-
         // Remove cart
         Cart cart = cartService.getCartByUserId(order.getUser().getId());
         if (cart != null) {
             cartService.removeCart(cart.getId());
         }
-
         // Update payment record
         Payment payment = paymentRepository.findByTransactionRef(order.getStripeSessionId())
                 .orElseThrow(() -> new IllegalArgumentException("Payment not found for sessionId: " + order.getStripeSessionId()));
