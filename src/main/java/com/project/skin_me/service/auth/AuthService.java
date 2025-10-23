@@ -104,7 +104,7 @@ public class AuthService implements IAuthService {
             logger.error("Unexpected error during login for email: {}. Error: {}", loginRequest.getEmail(),
                     e.getMessage(), e);
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Login failed: " + e.getMessage(), null));
+                    .body(new ApiResponse("Login failed: " + e.getMessage(), savedUser));
         }
     }
 
