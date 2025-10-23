@@ -104,7 +104,7 @@ public class AuthService implements IAuthService {
             logger.error("Unexpected error during login for email: {}. Error: {}", loginRequest.getEmail(),
                     e.getMessage(), e);
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Login failed: " + e.getMessage(), savedUser));
+                    .body(new ApiResponse("Login failed: " + e.getMessage(), null));
         }
     }
 
@@ -231,11 +231,11 @@ public class AuthService implements IAuthService {
             User savedUser = registerUser(newUser);
             logger.info("User registered successfully: {}", signupRequest.getEmail());
             return ResponseEntity.status(CREATED)
-                    .body(new ApiResponse("User registered successfully", null));
+                    .body(new ApiResponse("User registered successfully", savedUser));
         } catch (Exception e) {
             logger.error("Signup failed for email: {}. Error: {}", signupRequest.getEmail(), e.getMessage(), e);
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Signup failed: " + e.getMessage(), savedUser));
+                    .body(new ApiResponse("Signup failed: " + e.getMessage(), null));
         }
     }
 
