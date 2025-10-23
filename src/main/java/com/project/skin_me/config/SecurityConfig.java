@@ -45,6 +45,7 @@ public class SecurityConfig {
                         "/api/v1/images/**",
                         "/api/v1/payment/webhook",
                         "/api/v1/auth/**",
+                        "/api/v1/chatbot/**",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
@@ -79,9 +80,6 @@ public class SecurityConfig {
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .exceptionHandling(e -> e.authenticationEntryPoint(authEntryPoint))
                                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // Allow
-                                                                                                                    // sessions
-                                                                                                                    // for
-                                                                                                                    // web
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(PUBLIC_API).permitAll()
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -102,9 +100,9 @@ public class SecurityConfig {
                                                                                                                          // CSRF
                                                                                                                          // for
                                                                                                                          // APIs
-                                );
+                                )
 
-                http.authenticationProvider(daoAuthProvider());
+                .authenticationProvider(daoAuthProvider());
                 http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();

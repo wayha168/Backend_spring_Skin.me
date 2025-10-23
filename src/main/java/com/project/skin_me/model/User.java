@@ -1,5 +1,6 @@
 package com.project.skin_me.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +37,16 @@ public class User {
 
         private boolean enabled = true;
 
+        @Column(name = "registration_date", nullable = false)
+        private LocalDateTime registrationDate;
+
+        @Column(name = "last_login")
+        private LocalDateTime lastLogin;
+
+        @Column(name = "is_online")
+        @JsonProperty("isOnline")
+        private boolean isOnline = false;
+
         @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
         private Cart cart;
 
@@ -49,4 +61,16 @@ public class User {
         @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
         @JoinColumn(name = "favorite_list_id")
         private FavoriteList favoriteList;
+
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<Activity> activities;
+
+
+        public void setIsOnline(boolean isOnline) {
+        this.isOnline = isOnline;
+    }
+
+        public boolean isOnline() {
+        return isOnline;
+    }
 }

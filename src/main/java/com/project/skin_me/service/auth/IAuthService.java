@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 
 public interface IAuthService {
     ResponseEntity<ApiResponse> login(LoginRequest loginRequest, HttpServletResponse response);
+    ResponseEntity<ApiResponse> googleLogin(String code, HttpServletResponse response);
     ResponseEntity<ApiResponse> signup(SignupRequest signupRequest);
     ResponseEntity<ApiResponse> logout();
     ResponseEntity<ApiResponse> resetPassword(String email, String newPassword, String confirmPassword);
-    ResponseEntity<ApiResponse> googleLogin(String code, HttpServletResponse response);
 }

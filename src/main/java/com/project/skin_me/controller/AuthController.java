@@ -37,7 +37,9 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String email, @RequestParam String password,
+    public ResponseEntity<ApiResponse> resetPassword(
+            @RequestParam String email,
+            @RequestParam String password,
             @RequestParam String confirmPassword) {
         return authService.resetPassword(email, password, confirmPassword);
     }

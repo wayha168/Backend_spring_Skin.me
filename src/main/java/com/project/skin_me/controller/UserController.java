@@ -46,7 +46,7 @@ public class UserController {
 
     @PutMapping("/{userId}/update-users")
     public ResponseEntity<ApiResponse> updateUserById(@RequestBody UserUpdateRequest request,
-            @PathVariable Long userId) {
+                                                      @PathVariable Long userId) {
         try {
             User user = userService.updateUser(request, userId);
             UserDto userDto = userService.convertUserToDto(user);
@@ -65,5 +65,4 @@ public class UserController {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
-
 }
