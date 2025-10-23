@@ -101,7 +101,8 @@ public class AuthService implements IAuthService {
             return ResponseEntity.status(UNAUTHORIZED)
                     .body(new ApiResponse("Invalid email or password", null));
         } catch (Exception e) {
-            logger.error("Unexpected error during login for email: {}. Error: {}", loginRequest.getEmail(), e.getMessage(), e);
+            logger.error("Unexpected error during login for email: {}. Error: {}", loginRequest.getEmail(),
+                    e.getMessage(), e);
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Login failed: " + e.getMessage(), null));
         }
@@ -234,7 +235,7 @@ public class AuthService implements IAuthService {
         } catch (Exception e) {
             logger.error("Signup failed for email: {}. Error: {}", signupRequest.getEmail(), e.getMessage(), e);
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Signup failed: " + e.getMessage(), null));
+                    .body(new ApiResponse("Signup failed: " + e.getMessage(), savedUser));
         }
     }
 
@@ -334,7 +335,8 @@ public class AuthService implements IAuthService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             user.setLastLogin(LocalDateTime.now());
-            logger.debug("Before setting isOnline to true for user ID: {}, current isOnline: {}", userId, user.isOnline());
+            logger.debug("Before setting isOnline to true for user ID: {}, current isOnline: {}", userId,
+                    user.isOnline());
             user.setIsOnline(true);
             logger.debug("After setting isOnline to true for user ID: {}", userId);
             userRepository.save(user);
@@ -359,7 +361,8 @@ public class AuthService implements IAuthService {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            logger.debug("Before setting isOnline to false for user ID: {}, current isOnline: {}", userId, user.isOnline());
+            logger.debug("Before setting isOnline to false for user ID: {}, current isOnline: {}", userId,
+                    user.isOnline());
             user.setIsOnline(false);
             logger.debug("After setting isOnline to false for user ID: {}", userId);
             userRepository.save(user);
