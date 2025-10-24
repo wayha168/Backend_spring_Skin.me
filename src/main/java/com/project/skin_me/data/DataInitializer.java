@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -35,13 +36,13 @@ public class DataInitializer {
     }
 
     private void createDefaultRolesIfNotExists() {
-        if (!roleRepository.findByName("ROLE_USER").isPresent()) {
+        if (roleRepository.findByName("ROLE_USER").isEmpty()) {
             Role userRole = new Role();
             userRole.setName("ROLE_USER");
             roleRepository.save(userRole);
             logger.info("Created ROLE_USER");
         }
-        if (!roleRepository.findByName("ROLE_ADMIN").isPresent()) {
+        if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
             Role adminRole = new Role();
             adminRole.setName("ROLE_ADMIN");
             roleRepository.save(adminRole);
@@ -50,15 +51,24 @@ public class DataInitializer {
     }
 
     private void createDefaultAdminsIfNotExists() {
-        if (!userRepository.existsByEmail("admin@example.com")) {
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                    .orElseThrow(() -> {
-                        logger.error("ROLE_ADMIN not found");
-                        return new RuntimeException("ROLE_ADMIN not found");
-                    });
+        Optional<Role> adminRoleOpt = roleRepository.findByName("ROLE_ADMIN");
+        if (adminRoleOpt.isEmpty()) {
+            logger.error("ROLE_ADMIN not found! Skipping admin creation.");
+            return;
+        }
+        Role adminRole = adminRoleOpt.get();
+
+        // Create up to 3 default admin users
+        for (int i = 1; i <= 3; i++) {
+            String defaultEmail = "admin" + i + "@gmail.com";
+
+            if (userRepository.existsByEmail(defaultEmail)) {
+                logger.info("Admin user already exists: {}", defaultEmail);
+                continue;
+            }
 
             User admin = new User();
-            admin.setEmail("admin@example.com");
+            admin.setEmail(defaultEmail);
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setConfirmPassword(passwordEncoder.encode("admin123"));
             admin.setFirstName("Admin");
@@ -69,9 +79,7 @@ public class DataInitializer {
             admin.setRoles(new HashSet<>(Collections.singletonList(adminRole)));
 
             userRepository.save(admin);
-            logger.info("Created default admin user: admin@example.com");
-        } else {
-            logger.info("Admin user already exists: admin@example.com");
+            logger.info("Created default admin user: {}", defaultEmail);
         }
     }
 }
