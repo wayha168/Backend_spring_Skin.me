@@ -29,6 +29,7 @@ public class CartItemDto {
                     p.getProductType(),
                     p.getInventory(),
                     p.getDescription(),
+                    p.getHowToUse(),
                     p.getCategory(),
                     p.getImages() != null
                             ? p.getImages().stream()

@@ -88,7 +88,7 @@
 <body>
 <div class="dashboard-container">
     <h1>Admin Dashboard</h1>
-    <p>Welcome, <span th:text="${#authentication.name}">Admin</span></p>
+    <p>Welcome, <span th:text="${#authentication != null} ? ${#authentication.name} : 'Guest'">Guest</span></p>
 
     <!-- Success/Error Messages -->
     <div th:if="${param.success}" class="success-message">Operation successful!</div>
@@ -145,7 +145,7 @@
                 <td th:text="${product.price}"></td>
                 <td>
                     <img th:if="${product.image != null}"
-                         th:src="@{'/uploads/' + ${product.image.fileName}}"
+                         th:src="@{'/Uploads/' + ${product.image.fileName}}"
                          width="50" />
                 </td>
                 <td class="action-buttons">

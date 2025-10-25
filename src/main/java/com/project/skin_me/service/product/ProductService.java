@@ -70,6 +70,7 @@ public class ProductService implements IProductService {
                 request.getPrice(),
                 request.getProductType(),
                 request.getInventory(),
+                request.getHowToUse(),
                 request.getDescription(),
                 category);
     }
@@ -104,6 +105,7 @@ public class ProductService implements IProductService {
         existingProduct.setProductType(request.getProductType());
         existingProduct.setInventory(request.getInventory());
         existingProduct.setDescription(request.getDescription());
+        existingProduct.setHowToUse(request.getHowToUse());
 
         Category category = categoryRepository.findByname(request.getCategory().getName());
         existingProduct.setCategory(category);

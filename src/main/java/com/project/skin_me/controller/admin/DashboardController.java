@@ -1,4 +1,4 @@
-package com.project.skin_me.controller.Web;
+package com.project.skin_me.controller.admin;
 
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,5 +19,4 @@ public class DashboardController {
     public String dashboardPage() {
         return "dashboard";
     }
-
 }

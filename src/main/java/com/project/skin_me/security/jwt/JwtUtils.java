@@ -48,7 +48,8 @@ public class JwtUtils {
                 .setSigningKey(key())
                 .build()
                 .parseClaimsJws(token)
-                .getBody().getSubject();
+                .getBody()
+                .getSubject();
     }
 
     public boolean validateToken(String token) {

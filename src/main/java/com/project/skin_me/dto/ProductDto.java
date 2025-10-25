@@ -21,6 +21,7 @@ public class ProductDto {
     private String productType;
     private int inventory;
     private String description;
+    private String howToUse;
     private Category category;
     private List<ImageDto> images;
 
