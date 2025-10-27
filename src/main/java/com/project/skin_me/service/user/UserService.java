@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +48,20 @@ public class UserService implements IUserService {
                     logger.error("User not found with ID: {}", userId);
                     return new ResourceNotFoundException("User not found with ID: " + userId);
                 });
+    }
+
+    @Override
+    public List<UserDto> getAllUsers() {
+        logger.debug("Fetching all users");
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            logger.info("No users found in the database");
+        } else {
+            logger.info("Found {} users", users.size());
+        }
+        return users.stream()
+                .map(this::convertUserToDto)
+                .collect(Collectors.toList());
     }
 
     @Override

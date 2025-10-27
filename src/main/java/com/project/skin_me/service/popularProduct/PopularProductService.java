@@ -33,7 +33,6 @@ public class PopularProductService implements IPopularProductService {
             productRepository.save(product);
 
             PopularProduct popular = popularProductRepository.findByProductId(product.getId()).orElse(null);
-
             if (popular == null) {
                 if (product.getTotalOrders() >= POPULARITY_THRESHOLD) {
                     popular = new PopularProduct();
@@ -64,8 +63,25 @@ public class PopularProductService implements IPopularProductService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+    public List<PopularProductDto> getAllProductsWithSales() {
+        return productRepository.findAll()
+                .stream()
+                .map(product -> {
+                    PopularProduct popular = popularProductRepository.findByProductId(product.getId()).orElse(null);
+                    PopularProductDto dto = new PopularProductDto();
+                    dto.setProductId(product.getId());
+                    dto.setName(product.getName());
+                    dto.setPrice(product.getPrice());
+                    dto.setBrand(product.getBrand());
+                    dto.setQuantitySold(popular != null ? popular.getQuantitySold() : product.getTotalOrders());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
     public PopularProductDto convertToDto(PopularProduct popularProduct) {
         return modelMapper.map(popularProduct, PopularProductDto.class); // Assumes ModelMapper is configured
     }
+
+
 }

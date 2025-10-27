@@ -26,9 +26,20 @@ public class PopularProductController {
             List<PopularProductDto> popularProducts = popularProductService.getPopularProducts();
             if (popularProducts.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResponse("No products with sales over 10 units found!", null));
+                        .body(new ApiResponse("No products with sales over 10 units found!", popularProducts));
             }
             return ResponseEntity.ok(new ApiResponse("success", popularProducts));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error retrieving sales records: " + e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/sales")
+    public ResponseEntity<ApiResponse> getAllSalesRecords() {
+        try {
+            List<PopularProductDto> allProducts = popularProductService.getAllProductsWithSales();
+            return ResponseEntity.ok(new ApiResponse("success", allProducts));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("Error retrieving sales records: " + e.getMessage(), null));

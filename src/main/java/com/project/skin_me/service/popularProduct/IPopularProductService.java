@@ -11,4 +11,5 @@ public interface IPopularProductService {
     void saveFromOrder(Order order);
     Optional<PopularProduct> findByProductId(Long productId);
     List<PopularProductDto> getPopularProducts();
+    List<PopularProductDto> getAllProductsWithSales();
 }

@@ -42,11 +42,13 @@ public class SecurityConfig {
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
 
     private static final String[] PUBLIC_API = {
+            "/api/v1/users/**",
             "/api/v1/products/**",
             "/api/v1/categories/**",
             "/api/v1/images/**",
             "/api/v1/payment/webhook",
             "/api/v1/auth/**",
+            "/api/v1/popular/**",
             "/api/v1/chat/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",

@@ -18,4 +18,5 @@ public interface IUserService {
     void recordPurchase(Long userId, String orderDetails);
     List<Activity> getUserActivityHistory(Long userId);
     boolean isUserOnline(Long userId);
+    List<UserDto> getAllUsers();
 }

@@ -9,8 +9,12 @@ import com.project.skin_me.request.UserUpdateRequest;
 import com.project.skin_me.response.ApiResponse;
 import com.project.skin_me.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -30,6 +34,22 @@ public class UserController {
             return ResponseEntity.ok(new ApiResponse("Found!", userDto));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> getAllUsers() {
+        try {
+            List<UserDto> users = userService.getAllUsers();
+            if (users.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse("No users found", null));
+            }
+            return ResponseEntity.ok(new ApiResponse("Success", users));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error retrieving users: " + e.getMessage(), null));
         }
     }
 
