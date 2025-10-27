@@ -27,8 +27,11 @@ public class ShopUserDetails implements UserDetails {
     public static ShopUserDetails buildUserDetails(User user) {
         List<GrantedAuthority> authorities = user.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .map(role -> new SimpleGrantedAuthority(
+                        "ROLE_" + role.getName().toUpperCase().replace("ROLE_", "")
+                ))
                 .collect(Collectors.toList());
+
         return new ShopUserDetails(
                 user.getId(),
                 user.getEmail(),
@@ -39,6 +42,7 @@ public class ShopUserDetails implements UserDetails {
                 authorities
         );
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

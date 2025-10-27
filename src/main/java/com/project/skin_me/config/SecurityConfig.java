@@ -40,6 +40,8 @@ public class SecurityConfig {
 
     private final ShopUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
+    private final AuthTokenFilter jwtFilter;
+
 
     private static final String[] PUBLIC_API = {
             "/api/v1/users/**",
@@ -90,42 +92,29 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
                         .requestMatchers(SECURED_API).authenticated()
-                        .requestMatchers("/").authenticated()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
                 .formLogin(form -> form
                         .loginPage("/login-page")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/dashboard", true)
-                        .permitAll())
+                        .permitAll()
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login-page?logout")
-                        .permitAll())
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**"));
+                        .permitAll()
+                )
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**"));
 
-        http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, authException) -> {
-            String path = request.getRequestURI();
-            if (path.startsWith("/api/")) {
-                // Use JwtAuthEntryPoint for API requests
-                jwtAuthEntryPoint.commence(request, response, authException);
-            } else {
-                // Use LoginUrlAuthenticationEntryPoint for web requests
-                new LoginUrlAuthenticationEntryPoint("/login-page").commence(request, response, authException);
-            }
-        };
-    }
-
-    @Bean
     public DaoAuthenticationProvider daoAuthProvider() {
-        var provider = new DaoAuthenticationProvider();
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
@@ -137,13 +126,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthTokenFilter jwtFilter() {
-        return new AuthTokenFilter();
+    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
     @Bean
-    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            if (request.getRequestURI().startsWith("/api/")) {
+                jwtAuthEntryPoint.commence(request, response, authException);
+            } else {
+                new LoginUrlAuthenticationEntryPoint("/login-page")
+                        .commence(request, response, authException);
+            }
+        };
     }
 
     @Bean

@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ImageController {
     private final IImageService imageService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse> saveImages(@RequestParam List<MultipartFile> files,
             @RequestParam Long productId) {
