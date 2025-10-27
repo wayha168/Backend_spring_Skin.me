@@ -46,6 +46,17 @@ public class PopularProductController {
         }
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ApiResponse> getUserSalesRecords(@PathVariable Long userId) {
+        try {
+            List<PopularProductDto> userProducts = popularProductService.getUserSales(userId);
+            return ResponseEntity.ok(new ApiResponse("success", userProducts));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error retrieving user sales records: " + e.getMessage(), null));
+        }
+    }
+
     @GetMapping("/product/{productId}")
     public ResponseEntity<ApiResponse> getSalesRecordByProductId(@PathVariable Long productId) {
         try {

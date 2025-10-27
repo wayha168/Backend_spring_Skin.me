@@ -67,7 +67,8 @@ public class SecurityConfig {
             "/api/v1/favorites/**",
             "/api/v1/cartItems/**",
             "/api/v1/payment/**",
-            "/api/v1/orders/**"
+            "/api/v1/orders/**",
+            "/api/v1/popular/user/**"
     };
 
     private static final String[] ADMIN_URLS = {

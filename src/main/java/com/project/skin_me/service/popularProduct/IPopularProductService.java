@@ -12,4 +12,5 @@ public interface IPopularProductService {
     Optional<PopularProduct> findByProductId(Long productId);
     List<PopularProductDto> getPopularProducts();
     List<PopularProductDto> getAllProductsWithSales();
+    List<PopularProductDto> getUserSales(Long userId);
 }

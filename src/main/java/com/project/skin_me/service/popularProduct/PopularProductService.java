@@ -5,6 +5,7 @@ import com.project.skin_me.model.Order;
 import com.project.skin_me.model.OrderItem;
 import com.project.skin_me.model.PopularProduct;
 import com.project.skin_me.model.Product;
+import com.project.skin_me.repository.OrderRepository;
 import com.project.skin_me.repository.PopularProductRepository;
 import com.project.skin_me.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
@@ -21,6 +23,7 @@ public class PopularProductService implements IPopularProductService {
 
     private final PopularProductRepository popularProductRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
     private static final int POPULARITY_THRESHOLD = 10;
 
@@ -79,8 +82,42 @@ public class PopularProductService implements IPopularProductService {
                 .collect(Collectors.toList());
     }
 
+    public List<PopularProductDto> getUserSales(Long userId) {
+        // Fetch orders for the user
+        List<Order> orders = orderRepository.findByUserId(userId);
+        // Aggregate quantitySold per product from order items
+        Map<Long, Integer> productQuantities = orders.stream()
+                .flatMap(order -> order.getOrderItems().stream())
+                .collect(Collectors.groupingBy(
+                        item -> item.getProduct().getId(),
+                        Collectors.summingInt(OrderItem::getQuantity)
+                ));
+
+        // Convert to PopularProductDto
+        return productQuantities.entrySet().stream()
+                .map(entry -> {
+                    Long productId = entry.getKey();
+                    Integer quantitySold = entry.getValue();
+                    Product product = productRepository.findById(productId)
+                            .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
+                    PopularProductDto dto = new PopularProductDto();
+                    dto.setProductId(productId);
+                    dto.setName(product.getName());
+                    dto.setPrice(product.getPrice());
+                    dto.setBrand(product.getBrand());
+                    dto.setQuantitySold(quantitySold);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
     public PopularProductDto convertToDto(PopularProduct popularProduct) {
-        return modelMapper.map(popularProduct, PopularProductDto.class); // Assumes ModelMapper is configured
+        PopularProductDto dto = modelMapper.map(popularProduct, PopularProductDto.class);
+        Product product = popularProduct.getProduct();
+        dto.setName(product.getName());
+        dto.setPrice(product.getPrice());
+        dto.setBrand(product.getBrand());
+        return dto;
     }
 
 
