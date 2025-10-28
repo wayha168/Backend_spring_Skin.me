@@ -44,41 +44,22 @@ public class SecurityConfig {
 
 
     private static final String[] PUBLIC_API = {
-            "/api/v1/users/**",
-            "/api/v1/products/**",
-            "/api/v1/categories/**",
-            "/api/v1/images/**",
-            "/api/v1/payment/webhook",
-            "/api/v1/auth/**",
-            "/api/v1/popular/**",
-            "/api/v1/chat/**",
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/swagger-resources/**",
-            "/webjars/**",
-            "/login-page",
-            "/signup",
-            "/reset-password",
-            "/css/**",
-            "/js/**"
+            "/api/v1/users/**", "/api/v1/products/**", "/api/v1/categories/**",
+            "/api/v1/images/**", "/api/v1/payment/webhook", "/api/v1/auth/**",
+            "/api/v1/popular/**", "/api/v1/chat/**", "/v3/api-docs/**",
+            "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**",
+            "/webjars/**", "/login-page", "/signup", "/reset-password",
+            "/css/**", "/js/**"
     };
 
     private static final String[] SECURED_API = {
-            "/api/v1/carts/**",
-            "/api/v1/favorites/**",
-            "/api/v1/cartItems/**",
-            "/api/v1/payment/**",
-            "/api/v1/orders/**",
-            "/api/v1/popular/user/**"
+            "/api/v1/carts/**", "/api/v1/favorites/**", "/api/v1/cartItems/**",
+            "/api/v1/payment/**", "/api/v1/orders/**", "/api/v1/popular/user/**"
     };
 
     private static final String[] ADMIN_URLS = {
-            "/dashboard/**",
-            "/products/**",
-            "/categories/**",
-            "/sales/**",
-            "/api/v1/admin/**"
+            "/dashboard/**", "/products/**", "/categories/**",
+            "/sales/**", "/api/v1/admin/**"
     };
 
     @Bean
@@ -105,9 +86,11 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login-page?logout")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**"));
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**"))
+                .authenticationProvider(daoAuthProvider());
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }

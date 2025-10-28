@@ -23,9 +23,7 @@ public class CartItemService implements ICartItemService {
 
     @Override
     @Transactional
-    public void addItemToCart(Long cartId, Long productId, int quantity) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+    public void addItemToCart(Cart cart, Long productId, int quantity) {
         Product product = productService.getProductById(productId);
 
         Optional<CartItem> cartItemOpt = cart.getItems().stream()
@@ -33,18 +31,18 @@ public class CartItemService implements ICartItemService {
                 .findFirst();
 
         if (cartItemOpt.isPresent()) {
-            CartItem cartItem = cartItemOpt.get();
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            cartItem.setUnitPrice(product.getPrice());
-            cartItem.setTotalPrice();
+            CartItem existingItem = cartItemOpt.get();
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            existingItem.setUnitPrice(product.getPrice());
+            existingItem.setTotalPrice();
         } else {
-            CartItem cartItem = new CartItem();
-            cartItem.setCart(cart);
-            cartItem.setProduct(product);
-            cartItem.setQuantity(quantity);
-            cartItem.setUnitPrice(product.getPrice());
-            cartItem.setTotalPrice();
-            cart.addItem(cartItem);
+            CartItem newItem = new CartItem();
+            newItem.setCart(cart);
+            newItem.setProduct(product);
+            newItem.setQuantity(quantity);
+            newItem.setUnitPrice(product.getPrice());
+            newItem.setTotalPrice();
+            cart.addItem(newItem);
         }
 
         recalculateCartTotal(cart);

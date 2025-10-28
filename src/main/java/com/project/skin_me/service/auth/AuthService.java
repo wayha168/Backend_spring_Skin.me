@@ -221,8 +221,8 @@ public class AuthService implements IAuthService {
             newUser.setFirstName(signupRequest.getFirstName());
             newUser.setLastName(signupRequest.getLastName());
             newUser.setEmail(signupRequest.getEmail());
-            newUser.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-            newUser.setConfirmPassword(passwordEncoder.encode(signupRequest.getConfirmPassword()));
+            newUser.setPassword(signupRequest.getPassword());
+            newUser.setConfirmPassword(signupRequest.getConfirmPassword());
             newUser.setEnabled(true);
             newUser.setRegistrationDate(LocalDateTime.now());
             newUser.setIsOnline(false);
@@ -311,6 +311,7 @@ public class AuthService implements IAuthService {
         if (user.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+
         if (user.getRegistrationDate() == null) {
             user.setRegistrationDate(LocalDateTime.now());
         }

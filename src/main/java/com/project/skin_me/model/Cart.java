@@ -33,6 +33,12 @@ public class Cart {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(nullable = false)
+    private boolean isCheckedOut = false;
+
+    @Column(nullable = false)
+    private boolean active = true;
+
     public void addItem(CartItem item) {
         this.items.add(item);
         item.setCart(this);

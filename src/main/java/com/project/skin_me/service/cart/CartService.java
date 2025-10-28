@@ -27,6 +27,11 @@ public class CartService implements ICartService {
     }
 
     @Override
+    public Optional<Cart> getUserActiveCart(User user) {
+        return cartRepository.findByUserIdAndActive(user.getId(), true);
+    }
+
+    @Override
     @Transactional
     public void removeCart(Long id) {
         Cart cart = getCart(id);
@@ -43,12 +48,11 @@ public class CartService implements ICartService {
 
     @Override
     public Cart initializeNewCart(User user) {
-        return Optional.ofNullable(getCartByUserId(user.getId()))
-                .orElseGet(() -> {
-                    Cart cart = new Cart();
-                    cart.setUser(user);
-                    return cartRepository.save(cart);
-                });
+        Cart newCart = new Cart();
+        newCart.setUser(user);
+        newCart.setActive(true);
+        newCart.setTotalAmount(BigDecimal.ZERO);
+        return cartRepository.save(newCart);
     }
 
     @Override

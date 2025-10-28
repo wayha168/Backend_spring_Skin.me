@@ -68,11 +68,11 @@ public class DataInitializer {
             }
 
             User admin = new User();
+            admin.setFirstName("Admin");
+            admin.setLastName("User");
             admin.setEmail(defaultEmail);
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setConfirmPassword(passwordEncoder.encode("admin123"));
-            admin.setFirstName("Admin");
-            admin.setLastName("User");
             admin.setEnabled(true);
             admin.setRegistrationDate(LocalDateTime.now());
             admin.setIsOnline(false);

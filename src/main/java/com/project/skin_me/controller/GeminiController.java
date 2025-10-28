@@ -35,7 +35,6 @@ public class GeminiController {
                 Answer clearly and professionally. If no match, say: "I couldn't find a matching product."
                 """.formatted(markdownTable, userQuestion);
 
-        // 4. Call Gemini
         return geminiService.askGemini(prompt);
     }
 }
