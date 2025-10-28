@@ -43,4 +43,6 @@ public interface IProductService {
     List<ProductDto> getConvertedProducts(List<Product> products);
 
     List<Product> getPopularProducts();
+
+    String toMarkdownTable(List<Product> products);
 }

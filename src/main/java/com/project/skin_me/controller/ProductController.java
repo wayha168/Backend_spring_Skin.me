@@ -239,6 +239,37 @@ public class ProductController {
         }
     }
 
+    @GetMapping(value = "/markdown", produces = "text/markdown")
+    public ResponseEntity<String> getProductsMarkdown(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String productType) {
+
+        List<Product> products;
+
+        if (category != null && brand != null) {
+            products = productService.getProductsByCategoryAndBrand(category, brand);
+        } else if (brand != null && name != null) {
+            products = productService.getProductsByBrandAndName(brand, name);
+        } else if (category != null) {
+            products = productService.getAllProductsByCategory(category);
+        } else if (brand != null) {
+            products = productService.getProductsByBrand(brand);
+        } else if (name != null) {
+            products = productService.getProductsByName(name);
+        } else if (productType != null) {
+            products = productService.getProductsByProductType(productType);
+        } else {
+            products = productService.getAllProducts();
+        }
+
+        String markdown = productService.toMarkdownTable(products);
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/markdown")
+                .body(markdown);
+    }
+
     // @GetMapping("/by-category-and-type/")
     // public ResponseEntity<ApiResponse>
     // getProductsByCategoryAndProductType(@RequestParam String category,

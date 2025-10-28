@@ -70,8 +70,8 @@ public class ProductService implements IProductService {
                 request.getPrice(),
                 request.getProductType(),
                 request.getInventory(),
-                request.getHowToUse(),
                 request.getDescription(),
+                request.getHowToUse(),
                 category);
     }
 
@@ -184,6 +184,40 @@ public class ProductService implements IProductService {
                 .toList();
     }
 
+    private String escapeMarkdown(String s) {
+        return s == null ? "" : s.replace("|", "\\|").replace("\n", " ").replace("\r", "");
+    }
+
+    public String toMarkdownTable(List<Product> products) {
+        if (products == null || products.isEmpty()) {
+            return "_No products available._\n";
+        }
+
+        StringBuilder md = new StringBuilder();
+        md.append("| ID | Name | Brand | Price | Type | Inventory | Category | Images |\n");
+        md.append("|----|------|-------|-------|------|-----------|----------|--------|\n");
+
+        for (Product p : products) {
+            String images = p.getImages() != null && !p.getImages().isEmpty()
+                    ? p.getImages().stream()
+                    .map(img -> String.format("[%s](%s)", escapeMarkdown(img.getFileName()), img.getDownloadUrl()))
+                    .collect(java.util.stream.Collectors.joining(", "))
+                    : "_none_";
+
+            String category = p.getCategory() != null ? escapeMarkdown(p.getCategory().getName()) : "_none_";
+
+            md.append(String.format("| %d | %s | %s | $%s | %s | %d | %s | %s |\n",
+                    p.getId(),
+                    escapeMarkdown(p.getName()),
+                    escapeMarkdown(p.getBrand()),
+                    p.getPrice(),
+                    escapeMarkdown(p.getProductType()),
+                    p.getInventory(),
+                    category,
+                    images));
+        }
+        return md.toString();
+    }
     // @Override
     // public List<Product> getProductsByCategoryAndProductType(String category,
     // String productType) {
