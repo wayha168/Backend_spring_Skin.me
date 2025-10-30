@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.project.skin_me.model.Product;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
@@ -25,4 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Long countByBrandAndName(String brand, String name);
 
     boolean existsByNameAndBrand(String name, String brand);
+
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images")
+    List<Product> findAllWithImages();
 }

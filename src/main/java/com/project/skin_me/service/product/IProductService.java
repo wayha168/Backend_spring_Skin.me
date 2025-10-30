@@ -45,4 +45,7 @@ public interface IProductService {
     List<Product> getPopularProducts();
 
     String toMarkdownTable(List<Product> products);
+
+    List<Product> getAllProductsWithoutImages();
+
 }

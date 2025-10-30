@@ -46,16 +46,12 @@ public class GeminiService {
             return productService.getProductsByProductType("Sunscreen");
         }
 
-        // 2. Check for popular/general queries
         if (lowerPrompt.contains("popular") || lowerPrompt.contains("bestseller")) {
-            // Assuming this method exists and retrieves highly-rated or best-selling products.
             return productService.getPopularProducts();
         }
         try {
-            // Fetch a small, general sample (e.g., limit 10) to keep the context short.
             return productService.getAllProducts().stream().limit(10).toList();
         } catch (Exception e) {
-            // Log the error and return an empty list if data retrieval fails
             System.err.println("Error fetching all products for fallback: " + e.getMessage());
             return List.of();
         }
@@ -89,6 +85,8 @@ public class GeminiService {
             sb.append("  NAME: ").append(p.getName()).append("\n");
             sb.append("  BRAND: ").append(p.getBrand()).append("\n");
             sb.append("  TYPE: ").append(p.getProductType()).append("\n");
+            sb.append("  Description: ").append(p.getDescription()).append("\n");
+
             String keyFeatures = p.getDescription() != null ?
                                  p.getDescription().replace("\n", " ") : "Key features not available.";
             sb.append("  KEY_FEATURES: ").append(keyFeatures).append("\n");

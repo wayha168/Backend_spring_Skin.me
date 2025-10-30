@@ -1,12 +1,13 @@
 package com.project.skin_me.service.product;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.project.skin_me.event.ProductAddedEvent;
+import com.project.skin_me.event.ProductDeletedEvent;
+import com.project.skin_me.event.ProductUpdatedEvent;
 import com.project.skin_me.exception.AlreadyExistsException;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-
 import com.project.skin_me.dto.ImageDto;
 import com.project.skin_me.dto.ProductDto;
 import com.project.skin_me.exception.ProductNotFoundException;
@@ -19,8 +20,11 @@ import com.project.skin_me.repository.ImageRepository;
 import com.project.skin_me.repository.ProductRepository;
 import com.project.skin_me.request.AddProductRequest;
 import com.project.skin_me.request.ProductUpdateRequest;
-
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,14 +35,12 @@ public class ProductService implements IProductService {
     private final ImageRepository imageRepository;
     private final ModelMapper modelMapper;
 
-    @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public Product addProduct(AddProductRequest request) {
-
+        // Existing validation logic
         if (productExists(request.getBrand(), request.getName())) {
             throw new AlreadyExistsException(request.getBrand() + " " + request.getName() + " already exists, you might need to update");
         }
@@ -55,10 +57,51 @@ public class ProductService implements IProductService {
         }
 
         request.setCategory(category);
-        return productRepository.save(createProduct(request, category));
+        Product product = productRepository.save(createProduct(request, category));
+        eventPublisher.publishEvent(new ProductAddedEvent(this));
 
+        return product;
     }
 
+    @Override
+    public void deleteProductById(Long id) {
+        productRepository.findById(id)
+                .ifPresentOrElse(product -> {
+                    productRepository.delete(product);
+                    // 🔥 PUBLISH EVENT AFTER SUCCESSFUL DELETE
+                    eventPublisher.publishEvent(new ProductDeletedEvent(this));
+                }, () -> {
+                    throw new ProductNotFoundException("Product not found!");
+                });
+    }
+
+    @Override
+    public Product updateProduct(ProductUpdateRequest product, Long productId) {
+        return productRepository.findById(productId)
+                .map(existingProduct -> {
+                    Product updatedProduct = updateExistingProduct(existingProduct, product);
+                    Product savedProduct = productRepository.save(updatedProduct);
+                    // 🔥 PUBLISH EVENT AFTER SUCCESSFUL UPDATE
+                    eventPublisher.publishEvent(new ProductUpdatedEvent(this));
+                    return savedProduct;
+                })
+                .orElseThrow(() -> new ProductNotFoundException("Product not found!!"));
+    }
+
+    @Override
+    public List<Product> getAllProducts() {
+        return productRepository.findAllWithImages(); // ← FETCH IMAGES
+    }
+    public List<Product> getAllProductsWithoutImages() {
+        return productRepository.findAll();
+    }
+
+    @Override
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
+    }
+    // Keep your existing private helper methods
     private boolean productExists(String brand, String name) {
         return productRepository.existsByNameAndBrand(name, brand);
     }
@@ -73,29 +116,6 @@ public class ProductService implements IProductService {
                 request.getDescription(),
                 request.getHowToUse(),
                 category);
-    }
-
-    @Override
-    public Product getProductById(Long productId) {
-        return productRepository.findById(
-                productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
-    }
-
-    @Override
-    public void deleteProductById(Long id) {
-        productRepository.findById(id)
-                .ifPresentOrElse(productRepository::delete, () -> {
-                    throw new ProductNotFoundException("Product not found!");
-                });
-    }
-
-    @Override
-    public Product updateProduct(ProductUpdateRequest product, Long productId) {
-        return productRepository.findById(productId)
-                .map(existingProduct -> updateExistingProduct(existingProduct, product))
-                .map(productRepository::save)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!!"));
     }
 
     private Product updateExistingProduct(Product existingProduct, ProductUpdateRequest request) {
@@ -119,7 +139,6 @@ public class ProductService implements IProductService {
 
     @Override
     public List<Product> getProductsByBrand(String brand) {
-
         return productRepository.findByBrand(brand);
     }
 
@@ -172,7 +191,6 @@ public class ProductService implements IProductService {
         }).toList();
 
         productDto.setImages(imageDtos);
-
         return productDto;
     }
 
@@ -188,6 +206,7 @@ public class ProductService implements IProductService {
         return s == null ? "" : s.replace("|", "\\|").replace("\n", " ").replace("\r", "");
     }
 
+    @Override
     public String toMarkdownTable(List<Product> products) {
         if (products == null || products.isEmpty()) {
             return "_No products available._\n";
@@ -198,10 +217,10 @@ public class ProductService implements IProductService {
         md.append("|----|------|-------|-------|------|-----------|----------|--------|\n");
 
         for (Product p : products) {
-            String images = p.getImages() != null && !p.getImages().isEmpty()
+            String images = (p.getImages() != null && !p.getImages().isEmpty())
                     ? p.getImages().stream()
                     .map(img -> String.format("[%s](%s)", escapeMarkdown(img.getFileName()), img.getDownloadUrl()))
-                    .collect(java.util.stream.Collectors.joining(", "))
+                    .collect(Collectors.joining(", "))
                     : "_none_";
 
             String category = p.getCategory() != null ? escapeMarkdown(p.getCategory().getName()) : "_none_";
@@ -218,11 +237,4 @@ public class ProductService implements IProductService {
         }
         return md.toString();
     }
-    // @Override
-    // public List<Product> getProductsByCategoryAndProductType(String category,
-    // String productType) {
-    // throw new UnsupportedOperationException("Unimplemented method
-    // 'getProductsByCategoryAndProductType'");
-    // }
-
 }
