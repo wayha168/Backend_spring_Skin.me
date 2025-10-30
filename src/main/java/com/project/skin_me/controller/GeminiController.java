@@ -13,14 +13,15 @@ public class GeminiController {
 
     private final GeminiService geminiService;
     private final ProductService productService;
+    private final MarkdownCatalogLoader markdownCatalogLoader;
 
     @PostMapping("/assistant")
     public String askGeminiWithProducts(@RequestBody String userQuestion) {
         try {
-            // 1. Load the **latest** markdown from disk
-            String markdownTable = MarkdownCatalogLoader.load();
+            // 1. Load the latest markdown from the injected loader
+            String markdownTable = markdownCatalogLoader.load();
 
-            // 2. Build prompt (same logic, just source changed)
+            // 2. Build prompt
             String prompt = """
                     You are a helpful skincare assistant for SkinMe.
                     Use ONLY the product data below (Markdown table) to answer.

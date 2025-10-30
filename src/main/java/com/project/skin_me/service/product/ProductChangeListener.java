@@ -3,7 +3,9 @@ package com.project.skin_me.service.product;
 import com.project.skin_me.event.ProductAddedEvent;
 import com.project.skin_me.event.ProductDeletedEvent;
 import com.project.skin_me.event.ProductUpdatedEvent;
+import com.project.skin_me.model.Product;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,38 +21,36 @@ public class ProductChangeListener {
 
     private final IProductService productService;
 
-    // ---- ALWAYS use an absolute path (project root) ----
-    private static final Path EXPORT_DIR = Paths.get(System.getProperty("user.dir"), "exported-catalog");
-    private static final Path CATALOG_FILE = EXPORT_DIR.resolve("product-catalog.md");
+    @Value("${catalog.export.dir}")
+    private String exportDir;
+
+    private Path getExportDir() {
+        return Paths.get(exportDir);
+    }
+
+    private Path getCatalogFile() {
+        return getExportDir().resolve("product-catalog.md");
+    }
 
     @Async
-    @EventListener({
-            ProductAddedEvent.class,
-            ProductUpdatedEvent.class,
-            ProductDeletedEvent.class
-    })
+    @EventListener({ProductAddedEvent.class, ProductUpdatedEvent.class, ProductDeletedEvent.class})
     public void onProductChange() {
-        CompletableFuture.runAsync(() -> {
-            try {
-                // 1. Make sure the folder exists
-                Files.createDirectories(EXPORT_DIR);
-                System.out.println("[CATALOG] Export folder ready: " + EXPORT_DIR.toAbsolutePath());
+        try {
+            Path exportPath = getExportDir();
+            Path catalogFile = getCatalogFile();
 
-                // 2. Build markdown
-                var products = productService.getAllProducts();
-                String md = productService.toMarkdownTable(products);
-                if (md == null || md.isBlank()) {
-                    md = "_No products available._\n";
-                }
+            Files.createDirectories(exportPath);
 
-                // 3. Write file
-                Files.writeString(CATALOG_FILE, md);
-                System.out.println("[CATALOG] EXPORTED to " + CATALOG_FILE.toAbsolutePath());
+            var products = productService.getAllProducts();
+            String md = productService.toMarkdownTable(products);
+            if (md == null || md.isBlank()) md = "_No products available._\n";
 
-            } catch (Exception e) {
-                System.err.println("[CATALOG] EXPORT FAILED!");
-                e.printStackTrace();                 // <-- THIS SHOWS THE REAL ERROR
-            }
-        });
+            Files.writeString(catalogFile, md);
+
+            System.out.println("[CATALOG] Exported to " + catalogFile.toAbsolutePath());
+        } catch (Exception e) {
+            System.err.println("[CATALOG] EXPORT FAILED!");
+            e.printStackTrace();
+        }
     }
 }
