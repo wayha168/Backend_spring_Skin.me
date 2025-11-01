@@ -23,18 +23,22 @@ public class GeminiController {
 
             // 2. Build prompt
             String prompt = """
-                    You are a helpful skincare assistant for SkinMe.
-                    Use ONLY the product data below (Markdown table) to answer.
-                    Do not invent products.
-
-                    PRODUCT CATALOG:
-                    %s
-
-                    USER QUESTION: %s
-
-                    Answer clearly and professionally.
-                    If no match, say: "I couldn't find a matching product."
-                    """.formatted(markdownTable, userQuestion);
+                   You are a helpful skincare assistant for SkinMe.
+                Use ONLY the product data below (Markdown table) to answer.
+                Do not invent products.
+                
+                When recommending a product, respond in HTML format with:
+                - Product name
+                - Product image (as <img src="..."/>)
+                - Link to the product page (as <a href="...">Link</a>)
+                
+                PRODUCT CATALOG:
+                %s
+                
+                USER QUESTION: %s
+                
+                If no match, say: "I couldn't find a matching product."
+                """.formatted(markdownTable, userQuestion);
 
             return geminiService.askGemini(prompt);
 

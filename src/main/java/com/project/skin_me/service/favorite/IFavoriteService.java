@@ -12,6 +12,9 @@ public interface IFavoriteService {
 
     void removeFavorite(Long userId, Long productId);
 
+    void removeFavoriteById(Long userId, Long productId);
+
+
     FavoriteProductDto convertToDto(Object favoriteItem);
 
     List<FavoriteProductDto> getAllFavorites();

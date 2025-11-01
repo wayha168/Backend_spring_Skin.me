@@ -85,11 +85,28 @@ public class FavoriteService implements IFavoriteService {
     }
 
     @Override
+    @Transactional
+    public void removeFavoriteById(Long userId, Long productId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        FavoriteList favoriteList = favoriteListRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Favorites not found for user"));
+
+        // Find the favorite item by product ID
+        FavoriteItem item = (FavoriteItem) favoriteItemRepository.findByFavoriteListAndProductId(favoriteList.getId(), productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Favorite item not found for product ID: " + productId));
+
+        favoriteList.removeItem(item);
+        favoriteItemRepository.delete(item);
+    }
+
+    @Override
     public FavoriteProductDto convertToDto(Object obj) {
         FavoriteItem item = (FavoriteItem) obj;
         Product product = item.getProduct();
         String thumbnailUrl = (product.getImages() != null && !product.getImages().isEmpty())
-                ? product.getImages().get(0).getDownloadUrl() : null;
+                ? product.getImages().getFirst().getDownloadUrl() : null;
 
         return FavoriteProductDto.builder()
                 .id(item.getId())
