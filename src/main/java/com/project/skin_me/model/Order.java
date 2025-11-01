@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,6 +35,10 @@ public class Order {
     @Column(name = "transaction_ref")
     private String transactionRef;
 
+    private String trackingNumber;
+    private LocalDateTime shippedAt;
+    private LocalDateTime deliveredAt;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<OrderItem> orderItems = new HashSet<>();
@@ -47,5 +52,17 @@ public class Order {
 
     public Long getId() {
         return orderId;
+    }
+
+    public void setStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
+    public void setShippedAt(LocalDateTime now) {
+        this.shippedAt = now;
+    }
+
+    public void setDeliveredAt(LocalDateTime now) {
+        this.deliveredAt = now;
     }
 }

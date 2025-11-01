@@ -67,4 +67,17 @@ public class OrderController {
                     .body(new ApiResponse("Error fetching orders", e.getMessage()));
         }
     }
+
+    @PutMapping("/{orderId}/ship")
+    public ResponseEntity<ApiResponse> markAsShipped(@PathVariable Long orderId,
+                                                     @RequestParam(required = false) String trackingNumber) {
+        Order order = orderService.markAsShipped(orderId, trackingNumber);
+        return ResponseEntity.ok(new ApiResponse("Order marked as shipped", order));
+    }
+
+    @PutMapping("/{orderId}/deliver")
+    public ResponseEntity<ApiResponse> markAsDelivered(@PathVariable Long orderId) {
+        Order order = orderService.markAsDelivered(orderId);
+        return ResponseEntity.ok(new ApiResponse("Order marked as delivered", order));
+    }
 }

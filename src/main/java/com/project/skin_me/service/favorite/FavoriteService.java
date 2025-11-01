@@ -93,8 +93,8 @@ public class FavoriteService implements IFavoriteService {
         FavoriteList favoriteList = favoriteListRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Favorites not found for user"));
 
-        // Find the favorite item by product ID
-        FavoriteItem item = (FavoriteItem) favoriteItemRepository.findByFavoriteListAndProductId(favoriteList.getId(), productId)
+        FavoriteItem item = favoriteItemRepository
+                .findByFavoriteList_IdAndProductId(favoriteList.getId(), productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Favorite item not found for product ID: " + productId));
 
         favoriteList.removeItem(item);

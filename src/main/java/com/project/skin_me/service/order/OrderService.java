@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -161,5 +162,31 @@ public class OrderService implements IOrderService {
         // Update order status
         order.setOrderStatus(OrderStatus.PAID);
         updateOrder(order);
+    }
+    @Override
+    @Transactional
+    public Order markAsShipped(Long orderId, String trackingNumber) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+
+        if (trackingNumber == null || trackingNumber.isBlank()) {
+            trackingNumber = "TRK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        }
+
+        order.setTrackingNumber(trackingNumber);
+        order.setOrderStatus(OrderStatus.SHIPPED);
+        order.setShippedAt(LocalDateTime.now());
+        return orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public Order markAsDelivered(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+
+        order.setOrderStatus(OrderStatus.DELIVERED);
+        order.setDeliveredAt(LocalDateTime.now());
+        return orderRepository.save(order);
     }
 }

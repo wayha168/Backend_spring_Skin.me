@@ -1,6 +1,7 @@
 package com.project.skin_me.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,7 @@ public class FavoriteItem {
 
     @ManyToOne
     @JoinColumn(name = "favorite_list_id")
-    @JsonBackReference
+    @JsonIgnore
     private FavoriteList favoriteList;
 
     @ManyToOne

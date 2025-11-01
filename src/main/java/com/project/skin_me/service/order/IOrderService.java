@@ -15,4 +15,6 @@ public interface IOrderService {
     void updateOrder(Order order);
     Optional<Order> getOrderByStripeSessionId(String sessionId);
     void confirmOrderPayment(Order order);
+    Order markAsShipped(Long orderId, String trackingNumber);
+    Order markAsDelivered(Long orderId);
 }

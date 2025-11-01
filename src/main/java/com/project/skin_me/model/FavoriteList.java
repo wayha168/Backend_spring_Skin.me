@@ -25,7 +25,6 @@ public class FavoriteList {
 
     @OneToMany(mappedBy = "favoriteList", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    @Builder.Default // Add this to fix the warning
     private Set<FavoriteItem> items = new HashSet<>();
 
     public void addItem(FavoriteItem item) {
