@@ -40,7 +40,6 @@ public class ProductService implements IProductService {
 
     @Override
     public Product addProduct(AddProductRequest request) {
-        // Existing validation logic
         if (productExists(request.getBrand(), request.getName())) {
             throw new AlreadyExistsException(request.getBrand() + " " + request.getName() + " already exists, you might need to update");
         }
@@ -68,7 +67,6 @@ public class ProductService implements IProductService {
         productRepository.findById(id)
                 .ifPresentOrElse(product -> {
                     productRepository.delete(product);
-                    // 🔥 PUBLISH EVENT AFTER SUCCESSFUL DELETE
                     eventPublisher.publishEvent(new ProductDeletedEvent(this));
                 }, () -> {
                     throw new ProductNotFoundException("Product not found!");
@@ -92,6 +90,7 @@ public class ProductService implements IProductService {
     public List<Product> getAllProducts() {
         return productRepository.findAllWithImages(); // ← FETCH IMAGES
     }
+
     public List<Product> getAllProductsWithoutImages() {
         return productRepository.findAll();
     }
@@ -101,7 +100,7 @@ public class ProductService implements IProductService {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
     }
-    // Keep your existing private helper methods
+
     private boolean productExists(String brand, String name) {
         return productRepository.existsByNameAndBrand(name, brand);
     }

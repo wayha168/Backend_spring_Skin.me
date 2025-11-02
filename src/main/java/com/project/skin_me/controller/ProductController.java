@@ -41,6 +41,40 @@ public class ProductController {
         return ResponseEntity.ok(new ApiResponse("success", convertedProducts));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/add")
+    public ResponseEntity<ApiResponse> addProduct(@RequestBody AddProductRequest product) {
+        try {
+            Product theProduct = productService.addProduct(product);
+            return ResponseEntity.ok(new ApiResponse("Add product success", theProduct));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/product/{productId}/update")
+    public ResponseEntity<ApiResponse> updateProduct(@RequestBody ProductUpdateRequest productUpdateRequest,
+                                                     @PathVariable Long productId) {
+        try {
+            Product theProduct = productService.updateProduct(productUpdateRequest, productId);
+            return ResponseEntity.ok(new ApiResponse("Update successfully", theProduct));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/product/{productId}/delete")
+    public ResponseEntity<ApiResponse> deleteProducts(@PathVariable Long productId) {
+        try {
+            productService.deleteProductById(productId);
+            return ResponseEntity.ok(new ApiResponse("Delete product success", productId));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
     @GetMapping("product/{productId}/product")
     public ResponseEntity<ApiResponse> getProductById(@PathVariable Long productId) {
         try {
@@ -91,56 +125,49 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/product/by-brand")
-    public ResponseEntity<ApiResponse> findProductByBrand(@RequestParam String brand) {
+    @GetMapping("/by-category/{category}")
+    public ResponseEntity<ApiResponse> getProductsByCategory(@PathVariable String category) {
+        try {
+            if (category == null || category.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Category name must be provided!", null));
+            }
+
+            List<Product> products = productService.getAllProductsByCategory(category);
+            if (products.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse("No products found for category: " + category, null));
+            }
+
+            List<ProductDto> convertedProducts = productService.getConvertedProducts(products);
+            return ResponseEntity.ok(new ApiResponse("success", convertedProducts));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error retrieving products by category: " + e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/by-brand/{brand}")
+    public ResponseEntity<ApiResponse> getProductsByBrand(@PathVariable String brand) {
         try {
             if (brand == null || brand.isBlank()) {
-                return ResponseEntity.badRequest().body(new ApiResponse("Brand must be provided!", null));
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Brand name must be provided!", null));
             }
+
             List<Product> products = productService.getProductsByBrand(brand);
-            List<ProductDto> convertedProducts = productService.getConvertedProducts(products);
-
             if (products.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("No products found!", null));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse("No products found for brand: " + brand, null));
             }
 
+            List<ProductDto> convertedProducts = productService.getConvertedProducts(products);
             return ResponseEntity.ok(new ApiResponse("success", convertedProducts));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
-    }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addProduct(@RequestBody AddProductRequest product) {
-        try {
-            Product theProduct = productService.addProduct(product);
-            return ResponseEntity.ok(new ApiResponse("Add product success", theProduct));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("/product/{productId}/update")
-    public ResponseEntity<ApiResponse> updateProduct(@RequestBody ProductUpdateRequest productUpdateRequest,
-            @PathVariable Long productId) {
-        try {
-            Product theProduct = productService.updateProduct(productUpdateRequest, productId);
-            return ResponseEntity.ok(new ApiResponse("Update successfully", theProduct));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/product/{productId}/delete")
-    public ResponseEntity<ApiResponse> deleteProducts(@PathVariable Long productId) {
-        try {
-            productService.deleteProductById(productId);
-            return ResponseEntity.ok(new ApiResponse("Delete product success", productId));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Error retrieving products by brand: " + e.getMessage(), null));
         }
     }
 
@@ -193,19 +220,6 @@ public class ProductController {
 
             return ResponseEntity.ok(new ApiResponse("success", convertedProducts));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
-    }
-
-    @GetMapping("/product/{category}/all/products")
-    public ResponseEntity<ApiResponse> findProductsByCategory(@PathVariable String category) {
-        try {
-            List<Product> products = productService.getAllProductsByCategory(category);
-            if (products.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("success", null));
-            }
-            return ResponseEntity.ok(new ApiResponse("success", products));
-        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
