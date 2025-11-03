@@ -42,24 +42,13 @@ public class UserService implements IUserService {
 
     @Override
     public User getUserById(Long userId) {
-        logger.debug("Fetching user by ID: {}", userId);
         return userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    logger.error("User not found with ID: {}", userId);
-                    return new ResourceNotFoundException("User not found with ID: " + userId);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        logger.debug("Fetching all users");
-        List<User> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            logger.info("No users found in the database");
-        } else {
-            logger.info("Found {} users", users.size());
-        }
-        return users.stream()
+        return userRepository.findAll().stream()
                 .map(this::convertUserToDto)
                 .collect(Collectors.toList());
     }
@@ -67,35 +56,54 @@ public class UserService implements IUserService {
     @Override
     @Transactional
     public User createUser(CreateUserRequest request) {
-        logger.debug("Creating user with email: {}", request.getEmail());
+        // Validate password
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            logger.warn("Passwords do not match for email: {}", request.getEmail());
             throw new IllegalArgumentException("Passwords do not match");
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            logger.warn("User already exists with email: {}", request.getEmail());
-            throw new AlreadyExistsException("User already exists with email: " + request.getEmail());
+
+        // Map request to User
+        User newUser = new User();
+        newUser.setFirstName(request.getFirstName());
+        newUser.setLastName(request.getLastName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(request.getPassword());
+        newUser.setConfirmPassword(request.getConfirmPassword());
+        newUser.setEnabled(true);
+        newUser.setIsOnline(false);
+
+        // Assign role (admin can set role, default is USER)
+        Role assignedRole;
+        if (request.getRole() != null && request.getRole().getName() != null) {
+            assignedRole = roleRepository.findByName(request.getRole().getName())
+                    .orElseThrow(() -> new IllegalArgumentException("Role not found: " + request.getRole().getName()));
+        } else {
+            assignedRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Default role ROLE_USER not found."));
+        }
+        newUser.setRoles(new HashSet<>(Collections.singletonList(assignedRole)));
+
+        // Use the same registration logic as normal signup
+        return registerUser(newUser);
+    }
+
+    @Transactional
+    public User registerUser(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new AlreadyExistsException("Email already exists: " + user.getEmail());
         }
 
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> {
-                    logger.error("Default role ROLE_USER not found");
-                    return new RuntimeException("Default role ROLE_USER not found.");
-                });
-
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setConfirmPassword(null);
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEnabled(true);
-        user.setRegistrationDate(LocalDateTime.now());
+        // Encode password
+        if (user.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        if (user.getRegistrationDate() == null) {
+            user.setRegistrationDate(LocalDateTime.now());
+        }
         user.setIsOnline(false);
-        user.setRoles(new HashSet<>(Collections.singletonList(userRole)));
 
         User savedUser = userRepository.save(user);
 
+        // Log registration activity
         Activity activity = new Activity();
         activity.setUser(savedUser);
         activity.setActivityType(ActivityType.REGISTER);
@@ -103,43 +111,29 @@ public class UserService implements IUserService {
         activity.setDetails("User registered with email: " + user.getEmail());
         activityRepository.save(activity);
 
-        logger.info("User created successfully: {}", request.getEmail());
         return savedUser;
     }
 
     @Override
     @Transactional
     public User updateUser(UserUpdateRequest request, Long userId) {
-        logger.debug("Updating user with ID: {}", userId);
         return userRepository.findById(userId).map(existingUser -> {
             existingUser.setFirstName(request.getFirstName());
             existingUser.setLastName(request.getLastName());
-            User updatedUser = userRepository.save(existingUser);
-            logger.info("User updated successfully: ID {}", userId);
-            return updatedUser;
-        }).orElseThrow(() -> {
-            logger.error("User not found with ID: {}", userId);
-            return new ResourceNotFoundException("User not found with ID: " + userId);
-        });
+            return userRepository.save(existingUser);
+        }).orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
     }
 
     @Override
     @Transactional
     public void deleteUser(Long userId) {
-        logger.debug("Deleting user with ID: {}", userId);
         userRepository.findById(userId)
-                .ifPresentOrElse(user -> {
-                    userRepository.delete(user);
-                    logger.info("User deleted successfully: ID {}", userId);
-                }, () -> {
-                    logger.error("User not found with ID: {}", userId);
-                    throw new ResourceNotFoundException("User not found with ID: " + userId);
-                });
+                .ifPresentOrElse(userRepository::delete,
+                        () -> { throw new ResourceNotFoundException("User not found with ID: " + userId); });
     }
 
     @Override
     public UserDto convertUserToDto(User user) {
-        logger.debug("Converting user to DTO: {}", user.getEmail());
         return modelMapper.map(user, UserDto.class);
     }
 
@@ -147,51 +141,32 @@ public class UserService implements IUserService {
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        logger.debug("Fetching authenticated user with email: {}", email);
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    logger.error("User not found with email: {}", email);
-                    return new ResourceNotFoundException("User not found with email: " + email);
-                });
-    }
-
-    @Override
-    @Transactional
-    public void recordPurchase(Long userId, String orderDetails) {
-        logger.debug("Recording purchase for user ID: {}", userId);
-        if (orderDetails == null || orderDetails.trim().isEmpty()) {
-            logger.warn("Invalid order details for user ID: {}", userId);
-            throw new IllegalArgumentException("Order details cannot be empty");
-        }
-
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            Activity activity = new Activity();
-            activity.setUser(user);
-            activity.setActivityType(ActivityType.PURCHASE);
-            activity.setTimestamp(LocalDateTime.now());
-            activity.setDetails("Purchase made: " + orderDetails);
-            activityRepository.save(activity);
-
-            logger.info("Purchase recorded for user ID: {}", userId);
-        } else {
-            logger.error("User not found with ID: {}", userId);
-            throw new ResourceNotFoundException("User not found with ID: " + userId);
-        }
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 
     @Override
     public List<Activity> getUserActivityHistory(Long userId) {
-        logger.debug("Fetching activity history for user ID: {}", userId);
         return activityRepository.findByUserId(userId);
     }
 
     @Override
     public boolean isUserOnline(Long userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        boolean online = userOptional.map(User::isOnline).orElse(false);
-        logger.debug("User ID: {} isOnline: {}", userId, online);
-        return online;
+        return userRepository.findById(userId).map(User::isOnline).orElse(false);
+    }
+
+    @Override
+    @Transactional
+    public void recordPurchase(Long userId, String orderDetails) {
+        if (orderDetails == null || orderDetails.trim().isEmpty()) {
+            throw new IllegalArgumentException("Order details cannot be empty");
+        }
+        User user = getUserById(userId);
+        Activity activity = new Activity();
+        activity.setUser(user);
+        activity.setActivityType(ActivityType.PURCHASE);
+        activity.setTimestamp(LocalDateTime.now());
+        activity.setDetails("Purchase made: " + orderDetails);
+        activityRepository.save(activity);
     }
 }

@@ -16,9 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("${api.prefix}/users")
@@ -33,34 +30,32 @@ public class UserController {
             UserDto userDto = userService.convertUserToDto(user);
             return ResponseEntity.ok(new ApiResponse("Found!", userDto));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> getAllUsers() {
-        try {
-            List<UserDto> users = userService.getAllUsers();
-            if (users.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResponse("No users found", null));
-            }
-            return ResponseEntity.ok(new ApiResponse("Success", users));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Error retrieving users: " + e.getMessage(), null));
+        List<UserDto> users = userService.getAllUsers();
+        if (users.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("No users found", null));
         }
+        return ResponseEntity.ok(new ApiResponse("Success", users));
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ROLE_ADMIN')") // Only admin can create users
     public ResponseEntity<ApiResponse> createUser(@RequestBody CreateUserRequest request) {
         try {
             User user = userService.createUser(request);
             UserDto userDto = userService.convertUserToDto(user);
             return ResponseEntity.ok(new ApiResponse("Created!", userDto));
         } catch (AlreadyExistsException e) {
-            return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(e.getMessage(), null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
         }
     }
 
@@ -72,7 +67,7 @@ public class UserController {
             UserDto userDto = userService.convertUserToDto(user);
             return ResponseEntity.ok(new ApiResponse("Updated!", userDto));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
@@ -82,7 +77,7 @@ public class UserController {
             userService.deleteUser(userId);
             return ResponseEntity.ok(new ApiResponse("Deleted!", userId));
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
 }
