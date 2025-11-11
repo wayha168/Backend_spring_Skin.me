@@ -58,7 +58,7 @@ public class SecurityConfig {
     };
 
     private static final String[] ADMIN_URLS = {
-            "/dashboard/**", "/products/**", "/categories/**",
+            "/layout/dashboard/**", "/dashboard/**", "/products/**", "/categories/**",
             "/sales/**", "/api/v1/admin/**"
     };
 
@@ -76,14 +76,19 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login-page")
-                        .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .loginPage("/login-page")                     // GET  → show login.html
+                        .loginProcessingUrl("/auth/login")            // POST → Spring handles
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/layout/dashboard", true)
+                        .failureUrl("/auth/login?error")
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login-page?logout")
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**"))

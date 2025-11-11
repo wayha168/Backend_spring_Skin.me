@@ -1,0 +1,48 @@
+/* Tailwind-like utilities + custom colours */
+@import "https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.css";
+
+body { margin:0; font-family:system-ui,-apple-system,sans-serif; background:#f3f4f6; }
+.flex { display:flex; }
+.min-h-screen { min-height:100vh; }
+.bg-gray-100 { background:#f3f4f6; }
+.bg-white { background:#fff; }
+.shadow { box-shadow:0 4px 6px -1px rgba(0,0,0,.1); }
+.rounded-2xl { border-radius:1rem; }
+.p-6 { padding:1.5rem; }
+.p-8 { padding:2rem; }
+.space-y-8 > * + * { margin-top:2rem; }
+.grid { display:grid; }
+.grid-cols-1 { grid-template-columns:repeat(1,minmax(0,1fr)); }
+.md\\:grid-cols-3 { @media (min-width:768px) { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+.xl\\:grid-cols-4 { @media (min-width:1280px) { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+.gap-6 { gap:1.5rem; }
+.cursor-pointer { cursor:pointer; }
+.text-3xl { font-size:1.875rem; line-height:2.25rem; }
+.font-bold { font-weight:700; }
+.text-gray-800 { color:#1f2937; }
+.mb-6 { margin-bottom:1.5rem; }
+.bg-gradient-to-b { background:linear-gradient(to bottom,var(--tw-gradient-stops)); }
+.from-blue-600 { --tw-gradient-from:#2563eb; --tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to,rgba(37,99,235,0)); }
+.to-blue-400 { --tw-gradient-to:#60a5fa; }
+.w-48 { width:12rem; }
+.rounded-r-xl { border-top-right-radius:1.5rem; border-bottom-right-radius:1.5rem; }
+.text-white { color:#fff; }
+.text-2xl { font-size:1.5rem; line-height:2rem; }
+.tracking-wider { letter-spacing:.05em; }
+.text-center { text-align:center; }
+.hover\\:bg-sky-500:hover { background:#0ea5e9; }
+.hover\\:text-blue-600:hover { color:#2563eb; }
+.bg-sky-200 { background:#bae6fd; }
+.text-blue-600 { color:#2563eb; }
+.font-semibold { font-weight:600; }
+.shadow-lg { box-shadow:0 10px 15px -3px rgba(0,0,0,.1); }
+.mt-auto { margin-top:auto; }
+.pt-6 { padding-top:1.5rem; }
+.bg-red-600 { background:#dc2626; }
+.text-red-600 { color:#dc2626; }
+
+/* Card colours */
+.bg-green-50 { background:#f0fdf4; }
+.bg-blue-50   { background:#eff6ff; }
+.bg-orange-50{ background:#fff7ed; }
+.bg-purple-50{ background:#f5f3ff; }
