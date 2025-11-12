@@ -56,63 +56,82 @@ public class UserService implements IUserService {
     @Override
     @Transactional
     public User createUser(CreateUserRequest request) {
-        // Validate password
+        // 1. Password match
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match");
         }
 
-        // Map request to User
+        // 2. Email uniqueness
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AlreadyExistsException("Email already exists: " + request.getEmail());
+        }
+
+        // 3. Map request → entity
         User newUser = new User();
         newUser.setFirstName(request.getFirstName());
         newUser.setLastName(request.getLastName());
         newUser.setEmail(request.getEmail());
-        newUser.setPassword(request.getPassword());
-        newUser.setConfirmPassword(request.getConfirmPassword());
+        // encode password *before* saving
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        newUser.setConfirmPassword(passwordEncoder.encode(request.getConfirmPassword()));
+
         newUser.setEnabled(true);
         newUser.setIsOnline(false);
+        newUser.setRegistrationDate(LocalDateTime.now());
 
-        // Assign role (admin can set role, default is USER)
-        Role assignedRole;
+        // 4. Role handling
+        Role role;
         if (request.getRole() != null && request.getRole().getName() != null) {
-            assignedRole = roleRepository.findByName(request.getRole().getName())
-                    .orElseThrow(() -> new IllegalArgumentException("Role not found: " + request.getRole().getName()));
+            role = roleRepository.findByName(request.getRole().getName())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Role not found: " + request.getRole().getName()));
         } else {
-            assignedRole = roleRepository.findByName("ROLE_USER")
+            role = roleRepository.findByName("ROLE_USER")
                     .orElseThrow(() -> new RuntimeException("Default role ROLE_USER not found."));
         }
-        newUser.setRoles(new HashSet<>(Collections.singletonList(assignedRole)));
+        newUser.setRoles(new HashSet<>(Collections.singletonList(role)));
 
-        // Use the same registration logic as normal signup
-        return registerUser(newUser);
-    }
+        // 5. Persist
+        User savedUser = userRepository.save(newUser);
 
-    @Transactional
-    public User registerUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new AlreadyExistsException("Email already exists: " + user.getEmail());
-        }
-
-        // Encode password
-        if (user.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-        if (user.getRegistrationDate() == null) {
-            user.setRegistrationDate(LocalDateTime.now());
-        }
-        user.setIsOnline(false);
-
-        User savedUser = userRepository.save(user);
-
-        // Log registration activity
+        // 6. Activity log (optional – you already have registerUser that does this)
         Activity activity = new Activity();
         activity.setUser(savedUser);
         activity.setActivityType(ActivityType.REGISTER);
         activity.setTimestamp(LocalDateTime.now());
-        activity.setDetails("User registered with email: " + user.getEmail());
+        activity.setDetails("Admin created user: " + request.getEmail());
         activityRepository.save(activity);
 
         return savedUser;
     }
+
+//    @Transactional
+//    public User registerUser(User user) {
+//        if (userRepository.existsByEmail(user.getEmail())) {
+//            throw new AlreadyExistsException("Email already exists: " + user.getEmail());
+//        }
+//
+//        // Encode password
+//        if (user.getPassword() != null) {
+//            user.setPassword(passwordEncoder.encode(user.getPassword()));
+//        }
+//        if (user.getRegistrationDate() == null) {
+//            user.setRegistrationDate(LocalDateTime.now());
+//        }
+//        user.setIsOnline(false);
+//
+//        User savedUser = userRepository.save(user);
+//
+//        // Log registration activity
+//        Activity activity = new Activity();
+//        activity.setUser(savedUser);
+//        activity.setActivityType(ActivityType.REGISTER);
+//        activity.setTimestamp(LocalDateTime.now());
+//        activity.setDetails("User registered with email: " + user.getEmail());
+//        activityRepository.save(activity);
+//
+//        return savedUser;
+//    }
 
     @Override
     @Transactional

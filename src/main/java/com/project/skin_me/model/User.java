@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -30,6 +31,7 @@ public class User {
         @Column(unique = true, nullable = false)
         private String email;
         private String password;
+        @Transient
         private String confirmPassword;
 
         @Column(name = "google_id")
@@ -56,7 +58,7 @@ public class User {
         @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
                         CascadeType.REFRESH })
         @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-        private Collection<Role> roles = new HashSet<>();
+        private Set<Role> roles = new HashSet<>();
 
         @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
         @JoinColumn(name = "favorite_list_id")

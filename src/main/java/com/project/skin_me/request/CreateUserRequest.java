@@ -1,5 +1,6 @@
 package com.project.skin_me.request;
 
+import com.project.skin_me.dto.RoleDto;
 import com.project.skin_me.model.Role;
 import lombok.Data;
 
@@ -10,6 +11,5 @@ public class CreateUserRequest {
     private String email;
     private String password;
     private String confirmPassword;
-    private Role role;
-
+    private RoleDto role;
 }
