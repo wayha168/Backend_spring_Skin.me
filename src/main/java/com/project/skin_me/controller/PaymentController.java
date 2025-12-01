@@ -51,7 +51,7 @@ public class PaymentController {
             Payment payment = Payment.builder()
                     .order(order)
                     .amount(order.getOrderTotalAmount())
-                    .method(PaymentMethod.CREDIT_CARD)
+                    .method(PaymentMethod.CREDIT_CARD) // Stripe uses CREDIT_CARD
                     .status(OrderStatus.PENDING)
                     .transactionRef(session.getId())
                     .transactionTime(LocalDateTime.now())
