@@ -125,6 +125,19 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/product-active")
+    public ResponseEntity<ApiResponse> getActiveProducts() {
+        List<Product> activeProducts = productService.getActiveProducts();
+        List<ProductDto> convertedProducts = productService.getConvertedProducts(activeProducts);
+
+        if (activeProducts.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("No active products found!", null));
+        }
+
+        return ResponseEntity.ok(new ApiResponse("success", convertedProducts));
+    }
+
     @GetMapping("/by-category/{category}")
     public ResponseEntity<ApiResponse> getProductsByCategory(@PathVariable String category) {
         try {

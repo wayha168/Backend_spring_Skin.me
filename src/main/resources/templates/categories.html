@@ -1,0 +1,146 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle ?: 'Categories Management'}">Categories Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <style>
+      :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --light-bg: #f5f7fa;
+        --text-dark: #333;
+      }
+
+      body {
+        background: linear-gradient(135deg, var(--light-bg) 0%, #fff 100%);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+      }
+
+      .category-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+
+      .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+      }
+
+      .category-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 1.5rem;
+      }
+
+      .category-body {
+        padding: 1.5rem;
+      }
+
+      .badge-custom {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+      }
+
+      .btn-gradient {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #999;
+      }
+
+      .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div th:include="components/sidebar :: sidebar"></div>
+
+    <div class="page-header">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+          <h1 class="mb-0"><i class="bi bi-tags"></i> Categories Management</h1>
+          <button class="btn btn-light" th:onclick="window.location.href='/view/categories'">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid px-4">
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div th:if="${#lists.isEmpty(categories)}" class="card mt-4">
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <h5>No Categories Found</h5>
+          <p>There are no categories available at the moment.</p>
+        </div>
+      </div>
+
+      <div th:unless="${#lists.isEmpty(categories)}" class="row g-4 mb-5">
+        <div th:each="category : ${categories}" class="col-lg-4 col-md-6">
+          <div class="card category-card h-100">
+            <div class="category-header">
+              <h5 class="mb-0" th:text="${category.name}">Category Name</h5>
+            </div>
+            <div class="category-body">
+              <p class="text-muted mb-3">
+                <i class="bi bi-box-seam"></i>
+                <span th:text="${category.products?.size() ?: 0}">0</span> Products
+              </p>
+              <div class="d-flex gap-2">
+                <a
+                  th:href="'/view/products/category/' + ${category.id}"
+                  class="btn btn-sm btn-gradient flex-grow-1"
+                >
+                  <i class="bi bi-box"></i> View Products
+                </a>
+                <a th:href="'/view/categories/' + ${category.id}" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

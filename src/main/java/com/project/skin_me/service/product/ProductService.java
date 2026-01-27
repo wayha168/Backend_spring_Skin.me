@@ -1,5 +1,6 @@
 package com.project.skin_me.service.product;
 
+import com.project.skin_me.enums.ProductStatus;
 import com.project.skin_me.event.ProductAddedEvent;
 import com.project.skin_me.event.ProductDeletedEvent;
 import com.project.skin_me.event.ProductUpdatedEvent;
@@ -66,11 +67,17 @@ public class ProductService implements IProductService {
     public void deleteProductById(Long id) {
         productRepository.findById(id)
                 .ifPresentOrElse(product -> {
-                    productRepository.delete(product);
+                    product.setStatus(ProductStatus.INACTIVE);
+                    productRepository.save(product);
                     eventPublisher.publishEvent(new ProductDeletedEvent(this));
                 }, () -> {
                     throw new ProductNotFoundException("Product not found!");
                 });
+    }
+
+    @Override
+    public List<Product> getActiveProducts() {
+        return productRepository.findByStatus(ProductStatus.ACTIVE);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.project.skin_me.repository;
 
 import java.util.List;
 
+import com.project.skin_me.enums.ProductStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.project.skin_me.model.Product;
@@ -14,6 +15,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByBrand(String brand);
 
     List<Product> findByName(String name);
+
+    List<Product> findByStatus(ProductStatus status);
 
     List<Product> findByProductType(String productType);
 

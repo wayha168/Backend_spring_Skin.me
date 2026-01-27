@@ -1,0 +1,97 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle ?: 'Category Details'}">Category Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <style>
+      :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --light-bg: #f5f7fa;
+      }
+      body {
+        background: linear-gradient(135deg, var(--light-bg) 0%, #fff 100%);
+      }
+      .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+      }
+      .detail-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+      .product-item {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+      }
+      .product-item:hover {
+        transform: translateY(-5px);
+      }
+    </style>
+  </head>
+  <body>
+    <div th:include="components/sidebar :: sidebar"></div>
+
+    <div class="page-header">
+      <div class="container-fluid">
+        <div class="d-flex gap-3">
+          <a href="/categories" class="btn btn-light btn-sm"> <i class="bi bi-arrow-left"></i> Back </a>
+          <h1 class="mb-0"><i class="bi bi-tag"></i> Category Details</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid px-4 mb-5" th:if="${category}">
+      <div class="card detail-card mb-4">
+        <div class="card-body p-4">
+          <h3 th:text="${category.name}" class="mb-3">Category Name</h3>
+          <p class="text-muted">
+            <i class="bi bi-box"></i> <span th:text="${category.products?.size() ?: 0}">0</span> products in
+            this category
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <h5 class="mb-3"><i class="bi bi-grid"></i> Products</h5>
+        <div class="product-grid" th:if="${not #lists.isEmpty(category.products)}">
+          <div th:each="product : ${category.products}" class="product-item">
+            <div class="p-3">
+              <h6 th:text="${product.name}">Product Name</h6>
+              <p class="text-muted text-sm" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">
+                Price
+              </p>
+              <span class="badge bg-info" th:text="${product.inventory} + ' items'">Items</span>
+            </div>
+          </div>
+        </div>
+        <div th:if="${#lists.isEmpty(category.products)}" class="alert alert-info">
+          <i class="bi bi-info-circle"></i> No products in this category
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid px-4 mb-5" th:unless="${category}">
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-circle"></i> <span th:text="${error ?: 'Category not found'}"></span>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

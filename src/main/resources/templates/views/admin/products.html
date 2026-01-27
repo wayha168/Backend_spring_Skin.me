@@ -1,0 +1,285 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle ?: 'Products Management'}">Products Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <style>
+      :root {
+        --primary: #667eea;
+        --primary-dark: #764ba2;
+        --light-bg: #f5f7fa;
+        --text-dark: #333;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: linear-gradient(135deg, var(--light-bg) 0%, #fff 100%);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .main-content {
+        margin-left: 20%;
+        width: 80%;
+        padding: 30px;
+        min-height: 100vh;
+        background-color: var(--light-bg);
+        overflow-x: auto;
+      }
+
+      .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        border-radius: 12px;
+      }
+
+      .page-header h1 {
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .product-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .product-table thead {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+      }
+
+      .product-table tbody tr {
+        border-bottom: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+      }
+
+      .product-table tbody tr:hover {
+        background-color: #f8f9ff;
+      }
+
+      .badge-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+
+      .badge-active {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .badge-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .btn-gradient {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+      }
+
+      .price-badge {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+      }
+
+      .filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #999;
+        background: white;
+        border-radius: 12px;
+      }
+
+      .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #ddd;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          margin-left: 200px;
+          padding: 15px;
+        }
+
+        .page-header {
+          padding: 1.5rem;
+        }
+
+        .page-header h1 {
+          font-size: 22px;
+        }
+
+        .product-table {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div th:include="components/sidebar :: sidebar"></div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h1 class="mb-0"><i class="bi bi-box-seam"></i> Products Management</h1>
+          <button class="btn btn-light" th:onclick="location.reload()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <div class="filter-section">
+        <h6 class="mb-3"><i class="bi bi-funnel"></i> Filter & Search</h6>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Search products..." id="searchInput" />
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" id="categoryFilter">
+              <option value="">All Categories</option>
+              <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" id="statusFilter">
+              <option value="">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${#lists.isEmpty(products)}" class="empty-state mt-4">
+        <i class="bi bi-inbox"></i>
+        <h5>No Products Found</h5>
+        <p>There are no products available at the moment.</p>
+      </div>
+
+      <div th:unless="${#lists.isEmpty(products)}" class="product-table">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th><i class="bi bi-hash"></i> ID</th>
+              <th><i class="bi bi-bag"></i> Product Name</th>
+              <th><i class="bi bi-tag"></i> Brand</th>
+              <th><i class="bi bi-currency-dollar"></i> Price</th>
+              <th><i class="bi bi-box"></i> Inventory</th>
+              <th><i class="bi bi-toggles"></i> Status</th>
+              <th><i class="bi bi-graph-up"></i> Orders</th>
+              <th><i class="bi bi-gear"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="product : ${products}">
+              <td th:text="${product.id}">1</td>
+              <td>
+                <strong th:text="${product.name}">Product Name</strong>
+                <br />
+                <small class="text-muted" th:text="'Type: ' + ${product.productType}">Type</small>
+              </td>
+              <td th:text="${product.brand}">Brand</td>
+              <td>
+                <span class="price-badge" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"
+                  >$0.00</span
+                >
+              </td>
+              <td>
+                <span th:text="${product.inventory}">0</span>
+                <i class="bi bi-box" th:if="${product.inventory > 0}" class="text-success"></i>
+                <i class="bi bi-exclamation-circle" th:if="${product.inventory == 0}" class="text-danger"></i>
+              </td>
+              <td>
+                <span
+                  th:class="'badge-status badge-' + (${product.status} == 'ACTIVE' ? 'active' : 'inactive')"
+                  th:text="${product.status}"
+                  >ACTIVE</span
+                >
+              </td>
+              <td th:text="${product.totalOrders}">0</td>
+              <td>
+                <a
+                  th:href="'/views/products/' + ${product.id}"
+                  class="btn btn-sm btn-primary me-1"
+                  title="View"
+                >
+                  <i class="bi bi-eye"></i>
+                </a>
+                <button class="btn btn-sm btn-danger" title="Delete">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 text-center mb-5">
+        <p class="text-muted" th:text="'Total Products: ' + ${products?.size() ?: 0}">Total: 0</p>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.getElementById("searchInput").addEventListener("keyup", function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll(".product-table tbody tr");
+        rows.forEach((row) => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchTerm) ? "" : "none";
+        });
+      });
+
+      document.getElementById("categoryFilter").addEventListener("change", function (e) {
+        console.log("Filter by category:", e.target.value);
+      });
+
+      document.getElementById("statusFilter").addEventListener("change", function (e) {
+        console.log("Filter by status:", e.target.value);
+      });
+    </script>
+  </body>
+</html>

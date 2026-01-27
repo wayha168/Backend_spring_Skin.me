@@ -3,7 +3,6 @@ package com.project.skin_me.service.product;
 import com.project.skin_me.event.ProductAddedEvent;
 import com.project.skin_me.event.ProductDeletedEvent;
 import com.project.skin_me.event.ProductUpdatedEvent;
-import com.project.skin_me.model.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

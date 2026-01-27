@@ -1,7 +1,6 @@
 package com.project.skin_me.controller;
 
 import com.project.skin_me.service.chatAI.GeminiService;
-import com.project.skin_me.service.product.ProductService;
 import com.project.skin_me.util.MarkdownCatalogLoader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 public class GeminiController {
 
     private final GeminiService geminiService;
-    private final ProductService productService;
     private final MarkdownCatalogLoader markdownCatalogLoader;
 
     @PostMapping("/assistant")
