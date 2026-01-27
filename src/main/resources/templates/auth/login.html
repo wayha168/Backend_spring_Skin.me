@@ -162,6 +162,7 @@
         color: #667eea;
       }
     </style>
+<<<<<<< HEAD:src/main/resources/templates/login.html
   </head>
   <body>
     <div class="login-wrapper">
@@ -169,6 +170,27 @@
         <div class="login-header">
           <h1><i class="bi bi-spa"></i> SkinMe</h1>
           <p>Admin Login Portal</p>
+=======
+</head>
+<body>
+<div class="login-container">
+    <h2>Admin Login</h2>
+
+    <!-- Display success message after logout -->
+    <div th:if="${param.logout}" class="success-message">
+        You have been logged out successfully.
+    </div>
+
+    <!-- Display error message for invalid credentials -->
+    <div th:if="${param.error}" class="error-message">
+        Invalid email or password.
+    </div>
+
+    <form th:action="@{/auth/login}" method="post">
+        <div>
+            <label for="username">Email:</label>
+            <input type="text" id="username" name="username" required />
+>>>>>>> 3c27533a11c0c2b73bef8da34fd9e826d3b619d6:src/main/resources/templates/auth/login.html
         </div>
 
         <div class="login-body">
