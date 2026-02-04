@@ -17,6 +17,13 @@ class WebSocketClient {
    * Initialize WebSocket connection
    */
   connect(onConnect, onError) {
+    if (typeof SockJS === "undefined" || typeof Stomp === "undefined") {
+      const message = "SockJS or StompJS is not loaded. Include their scripts before websocket-client.js.";
+      console.error(message);
+      if (onError) onError(message);
+      return;
+    }
+
     const socket = new SockJS(this.endpoint);
     this.stompClient = Stomp.over(socket);
 

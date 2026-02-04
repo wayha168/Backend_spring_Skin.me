@@ -10,7 +10,7 @@ public class PageController {
 
     @GetMapping("/login-page")
     public String loginPage() {
-        return "login";
+        return "auth/login";
     }
 
     @GetMapping("/signup")
@@ -39,7 +39,12 @@ public class PageController {
 
     @GetMapping("/")
     public String homePage() {
-        return "index";
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/logout")
+    public String logoutPage() {
+        return "redirect:/login-page?logout";
     }
 
     @GetMapping("/views/categories")
@@ -64,7 +69,7 @@ public class PageController {
     }
 
     @GetMapping("/views/my-orders")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public String myOrdersListPage(Model model) {
         model.addAttribute("pageTitle", "My Orders");
         return "views/user/my-orders";
@@ -78,7 +83,7 @@ public class PageController {
     }
 
     @GetMapping("/views/my-payments")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public String myPaymentsListPage(Model model) {
         model.addAttribute("pageTitle", "My Payments");
         return "views/user/my-payments";

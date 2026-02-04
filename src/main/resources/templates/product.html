@@ -1,15 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="app :: layout(~{::main}, ~{::style}, ~{::script})">
 <head>
     <meta charset="UTF-8">
     <title>Product</title>
+    <style>
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 24px 32px;
+        min-height: 100vh;
+        background: #ffffff;
+      }
+    </style>
 </head>
 <body>
-    <div th:replace="components/sidebar :: sidebar"></div>
-
-    <div class="main-content">
+    <main class="main-content">
         <h1>Product Page</h1>
         <p>Welcome to the Product Page!</p>
-    </div>
+    </main>
 </body>
 </html>

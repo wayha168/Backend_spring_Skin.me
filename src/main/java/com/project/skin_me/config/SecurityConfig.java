@@ -42,101 +42,13 @@ public class SecurityConfig {
         private final JwtAuthEntryPoint jwtAuthEntryPoint;
         private final AuthTokenFilter jwtFilter;
 
-<<<<<<< HEAD
         private static final String[] PUBLIC_API = {
                         "/api/v1/users/**", "/api/v1/products/**", "/api/v1/categories/**",
                         "/api/v1/images/**", "/api/v1/payment/webhook", "/api/v1/auth/**",
                         "/api/v1/popular/**", "/api/v1/chat/**", "/v3/api-docs/**",
                         "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**",
-                        "/webjars/**", "/login-page", "/signup", "/reset-password",
+                        "/webjars/**", "/login-page", "/signup", "/reset-password", "/logout",
                         "/css/**", "/js/**", "/ws-endpoint/**", "/sockjs-node/**"
-=======
-
-    private static final String[] PUBLIC_API = {
-            "/api/v1/users/**", "/api/v1/products/**", "/api/v1/categories/**",
-            "/api/v1/images/**", "/api/v1/payment/webhook", "/api/v1/auth/**",
-            "/api/v1/popular/**", "/api/v1/chat/**", "/v3/api-docs/**",
-            "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**",
-            "/webjars/**", "/login-page", "/signup", "/reset-password",
-            "/css/**", "/js/**"
-    };
-
-    private static final String[] SECURED_API = {
-            "/api/v1/carts/**", "/api/v1/favorites/**", "/api/v1/cartItems/**",
-            "/api/v1/payment/**", "/api/v1/orders/**", "/api/v1/popular/user/**"
-    };
-
-    private static final String[] ADMIN_URLS = {
-            "/layout/dashboard/**", "/dashboard/**", "/products/**", "/categories/**",
-            "/sales/**", "/api/v1/admin/**"
-    };
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint()))
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_API).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
-                        .requestMatchers(SECURED_API).authenticated()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login-page")                     // GET  → show login.html
-                        .loginProcessingUrl("/auth/login")            // POST → Spring handles
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/layout/dashboard", true)
-                        .failureUrl("/auth/login?error")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/auth/logout")
-                        .logoutSuccessUrl("/auth/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
-                )
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/v3/api-docs/**", "/swagger-ui/**"))
-                .authenticationProvider(daoAuthProvider());
-
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-
-        return http.build();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider daoAuthProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, authException) -> {
-            if (request.getRequestURI().startsWith("/api/")) {
-                jwtAuthEntryPoint.commence(request, response, authException);
-            } else {
-                new LoginUrlAuthenticationEntryPoint("/login-page")
-                        .commence(request, response, authException);
-            }
->>>>>>> 3c27533a11c0c2b73bef8da34fd9e826d3b619d6
         };
 
         private static final String[] SECURED_API = {
@@ -170,8 +82,12 @@ public class SecurityConfig {
                                                 .logoutUrl("/logout")
                                                 .logoutSuccessUrl("/login-page?logout")
                                                 .permitAll())
-                                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/v3/api-docs/**",
-                                                "/swagger-ui/**"))
+                                .csrf(csrf -> csrf.ignoringRequestMatchers(
+                                                "/api/**",
+                                                "/v3/api-docs/**",
+                                                "/swagger-ui/**",
+                                                "/ws-endpoint/**"
+                                ))
                                 .authenticationProvider(daoAuthProvider());
 
                 http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

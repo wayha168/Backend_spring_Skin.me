@@ -1,5 +1,9 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  lang="en"
+  th:replace="app :: layout(~{::main}, ~{::style}, ~{::script})"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -29,8 +33,8 @@
       }
 
       .main-content {
-        margin-left: 20%;
-        width: 80%;
+        margin-left: 0;
+        width: 100%;
         padding: 30px;
         min-height: 100vh;
         background-color: var(--light-bg);
@@ -193,7 +197,6 @@
 
       @media (max-width: 768px) {
         .main-content {
-          margin-left: 200px;
           padding: 15px;
         }
 
@@ -214,9 +217,7 @@
     </style>
   </head>
   <body>
-    <div th:include="components/sidebar :: sidebar"></div>
-
-    <div class="main-content">
+    <main class="main-content">
       <div class="page-header">
         <div class="d-flex justify-content-between align-items-center">
           <h1 class="mb-0"><i class="bi bi-bag-check"></i> My Orders</h1>
@@ -238,10 +239,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-value">
-            <span
-              th:text="${orders?.stream()?.filter(o -> o.orderStatus?.toString() == 'COMPLETED')?.count() ?: 0}"
-              >0</span
-            >
+            <span th:text="${deliveredOrders ?: 0}">0</span>
           </div>
           <div class="stat-label">Delivered</div>
         </div>
@@ -251,7 +249,6 @@
         <i class="bi bi-inbox"></i>
         <h5>No Orders Yet</h5>
         <p>You haven't placed any orders yet. Start shopping!</p>
-        <a href="/" class="btn btn-gradient mt-3"> <i class="bi bi-shop"></i> Continue Shopping </a>
       </div>
 
       <div th:unless="${#lists.isEmpty(orders)}" class="mb-5">
@@ -299,7 +296,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>

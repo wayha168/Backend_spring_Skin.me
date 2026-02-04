@@ -13,7 +13,7 @@
     <h2 class="text-2xl font-bold text-white mb-5 tracking-wider text-center">Skin.Me</h2>
 
     <nav class="flex flex-col gap-4">
-        <a th:href="@{/layout/dashboard}" th:class="${#request.requestURI == '/layout/dashboard'} ? 'bg-sky-200 text-blue-600 font-semibold shadow-lg' : ''"
+        <a th:href="@{/dashboard}" th:class="${#request.requestURI == '/dashboard'} ? 'bg-sky-200 text-blue-600 font-semibold shadow-lg' : ''"
            class="flex items-center gap-3 p-5 rounded-lg transition-all text-white hover:bg-sky-500 hover:text-blue-600">
             <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
         </a>
@@ -139,7 +139,7 @@
 
         <!-- PAGINATION -->
         <div th:if="${totalPages > 1}" class="flex justify-center mt-6 gap-2" id="pagination">
-            <form id="pageForm" th:action="@{/layout/dashboard}" method="get" class="hidden">
+            <form id="pageForm" th:action="@{/dashboard}" method="get" class="hidden">
                 <input type="hidden" id="pageInput" name="page" />
             </form>
             <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">

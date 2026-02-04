@@ -1,5 +1,9 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  lang="en"
+  th:replace="app :: layout(~{::main}, ~{::style}, ~{::script})"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -29,8 +33,8 @@
       }
 
       .main-content {
-        margin-left: 20%;
-        width: 80%;
+        margin-left: 0;
+        width: 100%;
         padding: 30px;
         min-height: 100vh;
         background-color: var(--light-bg);
@@ -135,7 +139,6 @@
 
       @media (max-width: 768px) {
         .main-content {
-          margin-left: 200px;
           padding: 15px;
         }
 
@@ -154,9 +157,7 @@
     </style>
   </head>
   <body>
-    <div th:include="components/sidebar :: sidebar"></div>
-
-    <div class="main-content">
+    <main class="main-content">
       <div class="page-header">
         <div class="d-flex justify-content-between align-items-center">
           <h1 class="mb-0"><i class="bi bi-box-seam"></i> Products Management</h1>
@@ -229,8 +230,8 @@
               </td>
               <td>
                 <span th:text="${product.inventory}">0</span>
-                <i class="bi bi-box" th:if="${product.inventory > 0}" class="text-success"></i>
-                <i class="bi bi-exclamation-circle" th:if="${product.inventory == 0}" class="text-danger"></i>
+                <i class="bi bi-box text-success" th:if="${product.inventory > 0}"></i>
+                <i class="bi bi-exclamation-circle text-danger" th:if="${product.inventory == 0}"></i>
               </td>
               <td>
                 <span
@@ -260,7 +261,7 @@
       <div class="mt-4 text-center mb-5">
         <p class="text-muted" th:text="'Total Products: ' + ${products?.size() ?: 0}">Total: 0</p>
       </div>
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
