@@ -1,0 +1,106 @@
+/* ============================================
+   BADGE STYLES FOR VARIOUS STATES
+   ============================================ */
+
+/* Base Badge */
+.badge-custom {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-lg);
+    color: var(--white);
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Product Status Badges */
+.badge-status {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-lg);
+    font-weight: 600;
+    display: inline-block;
+    font-size: 0.85rem;
+}
+
+.badge-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Order Status Badges */
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-lg);
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-processing {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Payment Method Badges */
+.method-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius-lg);
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.method-card {
+    background-color: #e7f3ff;
+    color: #0066cc;
+}
+
+.method-cash {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.method-transfer {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.method-upi {
+    background-color: #e7f3ff;
+    color: #0066cc;
+}
+
+.method-wallet {
+    background-color: #f0fdf4;
+    color: #166534;
+}
+
+/* Responsive Badges */
+@media (max-width: 768px) {
+
+    .badge-status,
+    .status-badge,
+    .method-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.7rem;
+    }
+}

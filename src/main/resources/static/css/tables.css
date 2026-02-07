@@ -1,0 +1,161 @@
+/* ============================================
+   TABLE STYLES FOR PRODUCT, ORDER, PAYMENT TABLES
+   ============================================ */
+
+/* Base Table Styles */
+.data-table {
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.data-table thead {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+}
+
+.data-table thead th {
+    padding: 1.2rem;
+    font-weight: 700;
+    border: none;
+    text-align: left;
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--gray-200);
+    transition: all 0.3s ease;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--gray-100);
+}
+
+.data-table tbody td {
+    padding: 1rem 1.2rem;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Specific Table Types */
+.product-table {
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.product-table thead {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+}
+
+.product-table tbody tr {
+    border-bottom: 1px solid var(--gray-200);
+    transition: all 0.3s ease;
+}
+
+.product-table tbody tr:hover {
+    background-color: var(--gray-100);
+}
+
+/* Order Table */
+.order-table {
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.order-table thead {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+}
+
+.order-table tbody tr:hover {
+    background-color: var(--gray-100);
+}
+
+/* Payment Table */
+.payment-table {
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.payment-table thead {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+}
+
+.payment-table tbody tr:hover {
+    background-color: var(--gray-100);
+}
+
+/* Table Actions */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.table-actions .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 0.4rem;
+}
+
+.table-actions .btn-sm {
+    padding: 0.3rem 0.6rem;
+}
+
+/* Price Badge in Tables */
+.price-badge {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.4rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.amount-badge {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    border-radius: 0.4rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* ============================================
+   RESPONSIVE TABLE
+   ============================================ */
+@media (max-width: 768px) {
+
+    .data-table,
+    .product-table,
+    .order-table,
+    .payment-table {
+        font-size: 0.9rem;
+    }
+
+    .data-table thead th,
+    .data-table tbody td {
+        padding: 0.75rem;
+    }
+
+    .table-actions {
+        flex-direction: column;
+    }
+
+    .table-actions .btn {
+        width: 100%;
+        font-size: 0.75rem;
+    }
+}
