@@ -1,0 +1,204 @@
+/* ============================================
+   COMMON STYLES FOR ENTIRE APPLICATION
+   ============================================ */
+
+:root {
+    --primary: #667eea;
+    --primary-dark: #764ba2;
+    --light-bg: #f5f7fa;
+    --text-dark: #333;
+    --white: #ffffff;
+    --gray-100: #f8f9ff;
+    --gray-200: #e9ecef;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    --box-shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --box-shadow-md: 0 6px 20px rgba(102, 126, 234, 0.4);
+    --box-shadow-lg: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+/* Global Styles */
+body {
+    background: linear-gradient(135deg, var(--light-bg) 0%, var(--white) 100%);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* ============================================
+   PAGE HEADER STYLES
+   ============================================ */
+.page-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.page-header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.75rem;
+}
+
+.page-header .bi {
+    margin-right: 0.5rem;
+}
+
+/* ============================================
+   STAT CARDS
+   ============================================ */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-sm);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-lg);
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+}
+
+.stat-card .stat-label {
+    color: #999;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border: none;
+    color: var(--white);
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-md);
+    color: var(--white);
+}
+
+.btn-gradient:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #ddd;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* ============================================
+   FILTER SECTION
+   ============================================ */
+.filter-section {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow-sm);
+}
+
+.filter-section h5 {
+    margin-bottom: 1rem;
+    margin-top: 0;
+    font-weight: 700;
+}
+
+/* ============================================
+   CARDS & CONTAINERS
+   ============================================ */
+.card-item {
+    border: none;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-sm);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-lg);
+}
+
+.card-header-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: 1.5rem;
+    margin: 0;
+    border: none;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1.5rem 0;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+    }
+}
