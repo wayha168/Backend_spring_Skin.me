@@ -1,5 +1,3 @@
-// WebSocket Client Configuration for SkinMe Application
-// Include this in your HTML: <script src="/path/to/websocket-client.js"></script>
 
 class WebSocketClient {
   constructor(endpoint = "/ws-endpoint") {

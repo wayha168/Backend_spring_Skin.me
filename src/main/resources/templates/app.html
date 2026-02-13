@@ -13,44 +13,10 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" th:href="@{/css/layout.css}" />
     <th:block th:replace="${head}"></th:block>
   </head>
   <body>
-    <style>
-      .app-shell {
-        width: 100%;
-        display: flex;
-        min-height: 100vh;
-      }
-
-      .app-sidebar {
-        flex: 0 0 30%;
-        max-width: 30%;
-      }
-
-      .app-content {
-        flex: 0 0 70%;
-        max-width: 70%;
-        min-width: 0;
-      }
-
-      .app-content .main-content {
-        width: 100%;
-        margin-left: 0;
-      }
-
-      @media (max-width: 720px) {
-        .app-shell {
-          flex-direction: column;
-        }
-
-        .app-sidebar,
-        .app-content {
-          flex: 1 1 auto;
-          max-width: 100%;
-        }
-      }
-    </style>
     <div class="app-shell">
       <div class="app-sidebar" th:replace="components/sidebar :: sidebar"></div>
       <main class="app-content" th:replace="${content}"></main>
