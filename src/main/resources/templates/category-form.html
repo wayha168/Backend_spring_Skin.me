@@ -1,0 +1,78 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  lang="en"
+  th:replace="app :: layout(~{::main}, ~{::style}, ~{::script})"
+>
+  <head>
+    <th:block th:fragment="style">
+      <link rel="stylesheet" href="/css/common.css" />
+      <link rel="stylesheet" href="/css/forms.css" />
+    </th:block>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle ?: 'Category Form'}">Category Form</title>
+  </head>
+  <body>
+    <th:block th:fragment="main">
+    <main class="main-content">
+      <div th:replace="components/page-header :: page-header" th:with="pageIcon='bi-tags'"></div>
+      <div class="container-fluid px-4 mb-2">
+        <a th:href="@{/views/categories}" class="btn btn-outline-primary">
+          <i class="bi bi-arrow-left"></i> Back to Categories
+        </a>
+      </div>
+
+      <div class="container-fluid px-4 mb-5">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <div class="card detail-card">
+              <div class="card-header" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
+                <h5 class="mb-0">
+                  <i class="bi" th:classappend="${category != null ? 'bi-pencil' : 'bi-plus-circle'}"></i>
+                  <span th:text="${category != null ? 'Edit Category' : 'Create New Category'}">Category Form</span>
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                  <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <form th:action="${category != null ? '/views/categories/' + category.id + '/edit' : '/views/categories/create'}" 
+                      method="POST">
+                  
+                  <div class="mb-3">
+                    <label for="name" class="form-label">
+                      <i class="bi bi-tag"></i> Category Name
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="name" 
+                      name="name"
+                      th:value="${category != null ? category.name : ''}"
+                      required
+                      placeholder="Enter category name"
+                    />
+                  </div>
+
+                  <div class="d-flex gap-2 justify-content-end mt-4">
+                    <a th:href="@{/views/categories}" class="btn btn-outline-secondary">
+                      Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi" th:classappend="${category != null ? 'bi-check-circle' : 'bi-plus-circle'}"></i>
+                      <span th:text="${category != null ? 'Update Category' : 'Create Category'}">Submit</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    </th:block>
+  </body>
+</html>

@@ -1,66 +1,66 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  lang="en"
+  th:replace="app :: layout(~{::main}, ~{::style}, ~{::script})"
+>
   <head>
+    <th:block th:fragment="style">
+      <link rel="stylesheet" href="/css/common.css" />
+      <link rel="stylesheet" href="/css/details.css" />
+      <link rel="stylesheet" href="/css/cards.css" />
+    </th:block>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title th:text="${pageTitle ?: 'Category Details'}">Category Details</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
-    />
-    <link rel="stylesheet" href="/css/common.css" />
-    <link rel="stylesheet" href="/css/details.css" />
-    <link rel="stylesheet" href="/css/cards.css" />
   </head>
   <body>
-    <div th:include="components/sidebar :: sidebar"></div>
-
-    <div class="page-header">
-      <div class="container-fluid">
-        <div class="d-flex gap-3">
-          <a href="/categories" class="btn btn-light btn-sm"> <i class="bi bi-arrow-left"></i> Back </a>
-          <h1 class="mb-0"><i class="bi bi-tag"></i> Category Details</h1>
-        </div>
-      </div>
-    </div>
-
-    <div class="container-fluid px-4 mb-5" th:if="${category}">
-      <div class="card detail-card mb-4">
-        <div class="card-body p-4">
-          <h3 th:text="${category.name}" class="mb-3">Category Name</h3>
-          <p class="text-muted">
-            <i class="bi bi-box"></i> <span th:text="${category.products?.size() ?: 0}">0</span> products in
-            this category
-          </p>
-        </div>
+    <th:block th:fragment="main">
+      <div th:replace="components/page-header :: page-header" th:with="pageIcon='bi-tag', pageTitle=${pageTitle ?: 'Category Details'}"></div>
+      
+      <div class="container-fluid px-4 mb-2">
+        <a th:href="@{/views/categories}" class="btn btn-light btn-sm"> <i class="bi bi-arrow-left"></i> Back </a>
       </div>
 
-      <div class="mt-4">
-        <h5 class="mb-3"><i class="bi bi-grid"></i> Products</h5>
-        <div class="product-grid" th:if="${not #lists.isEmpty(category.products)}">
-          <div th:each="product : ${category.products}" class="product-item">
-            <div class="p-3">
-              <h6 th:text="${product.name}">Product Name</h6>
-              <p class="text-muted text-sm" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">
-                Price
-              </p>
-              <span class="badge bg-info" th:text="${product.inventory} + ' items'">Items</span>
-            </div>
+      <div class="container-fluid px-4 mb-5" th:if="${category}">
+        <div class="card detail-card mb-4">
+          <div class="card-body p-4">
+            <h3 th:text="${category.name}" class="mb-3">Category Name</h3>
+            <p class="text-muted">
+              <i class="bi bi-box"></i> 
+              <span th:text="${category.products != null ? category.products.size() : 0}">0</span> products in this category
+            </p>
           </div>
         </div>
-        <div th:if="${#lists.isEmpty(category.products)}" class="alert alert-info">
-          <i class="bi bi-info-circle"></i> No products in this category
+
+        <div class="mt-4">
+          <h5 class="mb-3"><i class="bi bi-grid"></i> Products</h5>
+          <div class="product-grid" th:if="${category.products != null and not #lists.isEmpty(category.products)}">
+            <div th:each="product : ${category.products}" class="product-item">
+              <div class="p-3">
+                <h6 th:text="${product.name}">Product Name</h6>
+                <p class="text-muted text-sm" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">
+                  Price
+                </p>
+                <span class="badge bg-info" th:text="${product.inventory} + ' items'">Items</span>
+              </div>
+            </div>
+          </div>
+          <div th:if="${category.products == null or #lists.isEmpty(category.products)}" class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No products in this category
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="container-fluid px-4 mb-5" th:unless="${category}">
-      <div class="alert alert-danger">
-        <i class="bi bi-exclamation-circle"></i> <span th:text="${error ?: 'Category not found'}"></span>
+      <div class="container-fluid px-4 mb-5" th:unless="${category}">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-circle"></i> <span th:text="${error ?: 'Category not found'}"></span>
+        </div>
       </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </th:block>
+    
+    <th:block th:fragment="script">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </th:block>
   </body>
 </html>

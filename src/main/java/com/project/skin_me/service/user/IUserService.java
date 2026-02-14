@@ -13,6 +13,8 @@ public interface IUserService {
     User createUser(CreateUserRequest request);
     User updateUser(UserUpdateRequest request, Long userId);
     void deleteUser(Long userId);
+    User assignRole(Long userId, String roleName);
+    User removeRole(Long userId, String roleName);
     UserDto convertUserToDto(User user);
     User getAuthenticatedUser();
     void recordPurchase(Long userId, String orderDetails);

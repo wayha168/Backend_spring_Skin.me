@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Controller
+// @Controller - Disabled: Routes consolidated into PageController
 @RequiredArgsConstructor
 @RequestMapping("/view/payments")
 public class PaymentViewController {
@@ -24,7 +24,7 @@ public class PaymentViewController {
     private final IUserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public String getAllPayments(Model model) {
         try {
             List<Payment> payments = paymentRepository.findAll();

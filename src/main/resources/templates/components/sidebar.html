@@ -1,265 +1,104 @@
-<style>
-  :root {
-    --primary: #667eea;
-    --primary-dark: #764ba2;
-    --light-bg: #f5f7fa;
-    --text-dark: #333;
-    --sidebar-bg: #ffffff;
-    --sidebar-text: #333;
-  }
-
-  .sidebar {
-    width: 100%;
-    height: 100vh;
-    background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
-    padding: 20px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    color: var(--sidebar-text);
-    box-shadow: 2px 0 15px rgba(102, 126, 234, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    overflow: hidden;
-    border-right: 1px solid rgba(102, 126, 234, 0.1);
-  }
-
-  .sidebar::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(102, 126, 234, 0.03), transparent 40%);
-    pointer-events: none;
-  }
-
-  .sidebar-header {
-    position: relative;
-    padding: 16px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-  }
-
-  .sidebar-header h2 {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #ffffff;
-  }
-
-  .sidebar-header i {
-    font-size: 24px;
-    color: #ffffff;
-  }
-
-  .sidebar-nav {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 8px 4px 0 4px;
-    width: 100%;
-    margin-top: 6px;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .sidebar-nav::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .sidebar-nav::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.3);
-    border-radius: 999px;
-  }
-
-  .nav-link {
-    color: var(--sidebar-text) !important;
-    padding: 12px 14px !important;
-    border-radius: 12px !important;
-    margin: 0 !important;
-    transition: all 0.3s ease !important;
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: relative;
-    background: rgba(102, 126, 234, 0.05);
-    border: 1px solid rgba(102, 126, 234, 0.1);
-  }
-
-  .nav-link:hover {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-    color: #ffffff !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-    border-color: var(--primary);
-  }
-
-  .nav-link.active {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-    border-color: var(--primary);
-  }
-
-  .nav-link > i {
-    width: 20px;
-    text-align: center;
-    font-size: 18px;
-  }
-
-  .nav-item.mb-3 {
-    margin-bottom: 0 !important;
-  }
-
-  .nav-item.mb-3 > .nav-link[data-bs-toggle="collapse"]::after {
-    content: "";
-    margin-left: auto;
-    display: inline-block;
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid currentColor;
-    transition: transform 0.2s;
-  }
-
-  .nav-item.mb-3 > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after {
-    transform: rotate(-180deg);
-  }
-
-  .collapse {
-    margin-top: 4px;
-    padding-left: 8px;
-  }
-
-  .collapse .nav-link {
-    font-size: 13px;
-    padding: 10px 12px !important;
-    color: var(--sidebar-text) !important;
-    background: rgba(102, 126, 234, 0.03);
-    border: 1px solid rgba(102, 126, 234, 0.05);
-  }
-
-  .collapse .nav-link:hover {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.25);
-    border-color: var(--primary);
-  }
-
-  .sidebar-footer {
-    position: relative;
-    margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid rgba(102, 126, 234, 0.1);
-  }
-
-  .sidebar-footer .nav-link {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: #ffffff !important;
-    border: none;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-  }
-
-  .sidebar-footer .nav-link:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
-  }
-
-  @media (max-width: 1024px) {
-    .sidebar {
-      width: 25%;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 100%;
-      height: auto;
-      border-radius: 0;
-      padding-bottom: 12px;
-      border-right: none;
-      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-    }
-  }
-</style>
-
-<div th:fragment="sidebar" class="sidebar">
+<div th:fragment="sidebar" class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h2><i class="bi bi-flower1"></i> SkinMe</h2>
+    <div class="d-flex justify-content-center align-items-center">
+      <h2 class="sidebar-title"><i class="bi bi-flower1"></i> <span class="sidebar-title-text">SkinMe</span></h2>
+    </div>
   </div>
 
-  <ul class="nav flex-column sidebar-nav">
-    <li class="nav-item mb-3">
-      <a th:href="@{/dashboard}" class="nav-link"> <i class="bi bi-speedometer2"></i> Dashboard </a>
+  <ul class="nav sidebar-nav" id="sidebar-nav">
+    <li class="nav-item">
+      <a th:href="@{/dashboard}" class="nav-link" data-tooltip="Dashboard"> 
+        <i class="bi bi-speedometer2"></i> 
+        <span class="nav-link-text">Dashboard</span>
+      </a>
     </li>
 
-    <li class="nav-item mb-3">
+    <li class="nav-separator"></li>
+
+    <li class="nav-item">
       <a
-        class="nav-link"
+        class="nav-link dropdown-toggle"
         data-bs-toggle="collapse"
         href="#stockMenu"
         role="button"
         aria-expanded="false"
         aria-controls="stockMenu"
+        data-tooltip="Stock Management"
       >
-        <i class="bi bi-box-seam"></i> Stock Management
+        <i class="bi bi-box-seam"></i> 
+        <span class="nav-link-text">Stock Management</span>
       </a>
-      <div class="collapse" id="stockMenu">
-        <a th:href="@{/views/categories}" class="nav-link"> <i class="bi bi-tags"></i> Categories </a>
-        <a th:href="@{/views/products}" class="nav-link"> <i class="bi bi-box"></i> Products </a>
+      <div class="collapse" id="stockMenu" data-bs-parent="#sidebar-nav">
+        <a th:href="@{/views/categories}" class="nav-link sub-nav-link" data-tooltip="Categories"> 
+          <i class="bi bi-tags"></i> 
+          <span class="nav-link-text">Categories</span> 
+        </a>
+        <a th:href="@{/views/products}" class="nav-link sub-nav-link" data-tooltip="Products"> 
+          <i class="bi bi-box"></i> 
+          <span class="nav-link-text">Products</span> 
+        </a>
       </div>
     </li>
 
-    <li class="nav-item mb-3">
+    <li class="nav-separator"></li>
+
+    <li class="nav-item">
       <a
-        class="nav-link"
+        class="nav-link dropdown-toggle"
         data-bs-toggle="collapse"
         href="#saleMenu"
         role="button"
         aria-expanded="false"
         aria-controls="saleMenu"
+        data-tooltip="Sales Management"
       >
-        <i class="bi bi-cash-coin"></i> Sales Management
+        <i class="bi bi-cash-coin"></i> 
+        <span class="nav-link-text">Sales Management</span>
       </a>
-      <div class="collapse" id="saleMenu">
-        <a th:href="@{/views/orders}" class="nav-link"> <i class="bi bi-bag-check"></i> Orders Record </a>
-        <a th:href="@{/views/payments}" class="nav-link"> <i class="bi bi-receipt"></i> Payment Record </a>
-        <a th:href="@{/views/delivery}" class="nav-link"> <i class="bi bi-truck"></i> Delivery Record </a>
+      <div class="collapse" id="saleMenu" data-bs-parent="#sidebar-nav">
+        <a th:href="@{/views/orders}" class="nav-link sub-nav-link" data-tooltip="Orders Record"> 
+          <i class="bi bi-bag-check"></i> 
+          <span class="nav-link-text">Orders Record</span> 
+        </a>
+        <a th:href="@{/views/payments}" class="nav-link sub-nav-link" data-tooltip="Payment Record"> 
+          <i class="bi bi-receipt"></i> 
+          <span class="nav-link-text">Payment Record</span> 
+        </a>
+        <a th:href="@{/views/delivery}" class="nav-link sub-nav-link" data-tooltip="Delivery Record"> 
+          <i class="bi bi-truck"></i> 
+          <span class="nav-link-text">Delivery Record</span> 
+        </a>
       </div>
     </li>
 
-    <li class="nav-item mb-3">
+    <li class="nav-separator"></li>
+
+    <li class="nav-item">
       <a
-        class="nav-link"
+        class="nav-link dropdown-toggle"
         data-bs-toggle="collapse"
         href="#userMenu"
         role="button"
         aria-expanded="false"
         aria-controls="userMenu"
+        data-tooltip="User Menu"
       >
-        <i class="bi bi-person-circle"></i> User Menu
+        <i class="bi bi-person-circle"></i> 
+        <span class="nav-link-text">User Menu</span>
       </a>
-      <div class="collapse" id="userMenu">
-        <a th:href="@{/views/my-orders}" class="nav-link"> <i class="bi bi-bag"></i> My Orders </a>
-        <a th:href="@{/views/my-payments}" class="nav-link"> <i class="bi bi-wallet2"></i> My Payments </a>
+      <div class="collapse" id="userMenu" data-bs-parent="#sidebar-nav">
+        <a th:href="@{/views/my-orders}" class="nav-link sub-nav-link" data-tooltip="My Orders"> 
+          <i class="bi bi-bag"></i> 
+          <span class="nav-link-text">My Orders</span> 
+        </a>
+        <a th:href="@{/views/my-payments}" class="nav-link sub-nav-link" data-tooltip="My Payments"> 
+          <i class="bi bi-wallet2"></i> 
+          <span class="nav-link-text">My Payments</span> 
+        </a>
+        <a th:href="@{/views/users}" class="nav-link sub-nav-link" sec:authorize="hasRole('ADMIN')" data-tooltip="User Management"> 
+          <i class="bi bi-people"></i> 
+          <span class="nav-link-text">User Management</span> 
+        </a>
       </div>
     </li>
   </ul>
@@ -268,15 +107,89 @@
     <a
       href="#"
       class="nav-link"
-      onclick="
-        event.preventDefault();
-        document.getElementById('logoutForm').submit();
-      "
+      data-tooltip="Logout"
+      onclick="handleLogout(event);"
     >
-      <i class="bi bi-box-arrow-right"></i> Logout
+      <i class="bi bi-box-arrow-right"></i> <span class="nav-link-text">Logout</span>
     </a>
   </div>
 </div>
 
-<form id="logoutForm" th:action="@{/logout}" method="POST" style="display: none"></form>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Ensure only one dropdown menu is open at a time
+  (function() {
+    function initSidebarDropdowns() {
+      const sidebarNav = document.getElementById('sidebar-nav');
+      if (!sidebarNav) return;
+
+      const collapseElements = sidebarNav.querySelectorAll('.collapse');
+      const toggleLinks = sidebarNav.querySelectorAll('[data-bs-toggle="collapse"]');
+
+      // Function to close all collapses except the target
+      function closeOtherCollapses(targetCollapse) {
+        collapseElements.forEach(function(collapse) {
+          if (collapse !== targetCollapse && collapse.classList.contains('show')) {
+            // Try to use Bootstrap Collapse API if available
+            if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+              const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+              if (bsCollapse) {
+                bsCollapse.hide();
+                return;
+              }
+            }
+            // Fallback: manually hide
+            collapse.classList.remove('show');
+            const otherToggle = sidebarNav.querySelector('[href="#' + collapse.id + '"]');
+            if (otherToggle) {
+              otherToggle.setAttribute('aria-expanded', 'false');
+            }
+          }
+        });
+      }
+
+      toggleLinks.forEach(function(toggleLink) {
+        toggleLink.addEventListener('click', function(e) {
+          const targetId = this.getAttribute('href');
+          const targetCollapse = document.querySelector(targetId);
+          
+          if (!targetCollapse) return;
+
+          // If clicking on an already open menu, close it
+          const isExpanded = this.getAttribute('aria-expanded') === 'true';
+          
+          if (!isExpanded) {
+            // Close all other collapses before opening this one
+            closeOtherCollapses(targetCollapse);
+          }
+        });
+      });
+
+      // Update aria-expanded when collapse events fire (if Bootstrap is available)
+      if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+        collapseElements.forEach(function(collapse) {
+          collapse.addEventListener('show.bs.collapse', function() {
+            const toggle = sidebarNav.querySelector('[href="#' + this.id + '"]');
+            if (toggle) {
+              toggle.setAttribute('aria-expanded', 'true');
+            }
+          });
+
+          collapse.addEventListener('hide.bs.collapse', function() {
+            const toggle = sidebarNav.querySelector('[href="#' + this.id + '"]');
+            if (toggle) {
+              toggle.setAttribute('aria-expanded', 'false');
+            }
+          });
+        });
+      }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSidebarDropdowns);
+    } else {
+      initSidebarDropdowns();
+    }
+  })();
+</script>

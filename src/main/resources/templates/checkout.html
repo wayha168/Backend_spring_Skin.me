@@ -1,0 +1,219 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  lang="en"
+  th:replace="app :: layout(~{::main}, ~{::style}, ~{::script})"
+>
+  <head>
+    <th:block th:fragment="style">
+      <link rel="stylesheet" href="/css/common.css" />
+      <style>
+        .checkout-container {
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        .card-element {
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          background: white;
+          margin-bottom: 20px;
+        }
+        .card-element:focus {
+          border-color: #0066cc;
+          outline: none;
+        }
+        .StripeElement {
+          height: 40px;
+        }
+        #card-errors {
+          color: #dc3545;
+          margin-top: 10px;
+          font-size: 0.875rem;
+        }
+        .payment-form {
+          background: #f8f9fa;
+          padding: 30px;
+          border-radius: 8px;
+        }
+        .order-summary {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+        }
+      </style>
+    </th:block>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout - Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <th:block th:fragment="main">
+      <div th:replace="components/page-header :: page-header" th:with="pageIcon='bi-credit-card', pageTitle='Checkout'"></div>
+      
+      <div class="container-fluid px-4 mb-5">
+        <div class="checkout-container">
+          <div class="order-summary" th:if="${order}">
+            <h5 class="mb-3"><i class="bi bi-receipt"></i> Order Summary</h5>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Order ID:</span>
+              <strong th:text="'#' + ${order.orderId}">#12345</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Total Amount:</span>
+              <strong style="color: #0066cc; font-size: 1.2rem;" 
+                     th:text="'$' + ${#numbers.formatDecimal(order.orderTotalAmount, 1, 2)}">$0.00</strong>
+            </div>
+          </div>
+
+          <div class="payment-form">
+            <h5 class="mb-4"><i class="bi bi-credit-card-2-front"></i> Payment Details</h5>
+            
+            <form id="payment-form" th:if="${order}">
+              <input type="hidden" id="order-id" th:value="${order.id}" />
+              <input type="hidden" id="amount-cents" th:value="${order.orderTotalAmount * 100}" />
+              
+              <div class="mb-3">
+                <label for="card-element" class="form-label">Card Information</label>
+                <div id="card-element" class="card-element">
+                  <!-- Stripe Elements will create form elements here -->
+                </div>
+                <div id="card-errors" role="alert"></div>
+              </div>
+
+              <div class="mb-3">
+                <label for="cardholder-name" class="form-label">Cardholder Name</label>
+                <input type="text" id="cardholder-name" class="form-control" placeholder="John Doe" required />
+              </div>
+
+              <button type="submit" id="submit-button" class="btn btn-primary w-100" style="height: 50px;">
+                <span id="button-text">
+                  <i class="bi bi-lock-fill"></i> Pay 
+                  <span th:text="'$' + ${#numbers.formatDecimal(order.orderTotalAmount, 1, 2)}">$0.00</span>
+                </span>
+                <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+              </button>
+            </form>
+
+            <div th:if="${error}" class="alert alert-danger mt-3">
+              <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </th:block>
+    
+    <th:block th:fragment="script">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <script th:inline="javascript">
+        // Initialize Stripe with public key
+        const stripe = Stripe(/*[[${stripePublicKey}]]*/ 'pk_test_...');
+        const elements = stripe.elements();
+        
+        // Create card element
+        const cardElement = elements.create('card', {
+          style: {
+            base: {
+              fontSize: '16px',
+              color: '#424770',
+              '::placeholder': {
+                color: '#aab7c4',
+              },
+            },
+            invalid: {
+              color: '#9e2146',
+            },
+          },
+        });
+        
+        cardElement.mount('#card-element');
+        
+        // Handle real-time validation errors from the card Element
+        cardElement.on('change', function(event) {
+          const displayError = document.getElementById('card-errors');
+          if (event.error) {
+            displayError.textContent = event.error.message;
+          } else {
+            displayError.textContent = '';
+          }
+        });
+        
+        // Handle form submission
+        const form = document.getElementById('payment-form');
+        form.addEventListener('submit', async function(event) {
+          event.preventDefault();
+          
+          const submitButton = document.getElementById('submit-button');
+          const buttonText = document.getElementById('button-text');
+          const spinner = document.getElementById('spinner');
+          
+          // Disable button and show spinner
+          submitButton.disabled = true;
+          buttonText.classList.add('d-none');
+          spinner.classList.remove('d-none');
+          
+          const cardholderName = document.getElementById('cardholder-name').value;
+          const orderId = document.getElementById('order-id').value;
+          const amountCents = document.getElementById('amount-cents').value;
+          
+          try {
+            // Create payment intent on server
+            const response = await fetch('/api/v1/payment/create-payment-intent', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId: orderId,
+                amountCents: parseInt(amountCents),
+                cardholderName: cardholderName
+              })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+              throw new Error(data.message || 'Failed to create payment intent');
+            }
+            
+            // Confirm payment with Stripe
+            const { error, paymentIntent } = await stripe.confirmCardPayment(
+              data.data.clientSecret,
+              {
+                payment_method: {
+                  card: cardElement,
+                  billing_details: {
+                    name: cardholderName,
+                  },
+                },
+              }
+            );
+            
+            if (error) {
+              // Show error to user
+              const displayError = document.getElementById('card-errors');
+              displayError.textContent = error.message;
+              submitButton.disabled = false;
+              buttonText.classList.remove('d-none');
+              spinner.classList.add('d-none');
+            } else {
+              // Payment succeeded
+              if (paymentIntent.status === 'succeeded') {
+                window.location.href = '/payment-success?orderId=' + orderId + '&paymentIntentId=' + paymentIntent.id;
+              }
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            const displayError = document.getElementById('card-errors');
+            displayError.textContent = error.message || 'An error occurred. Please try again.';
+            submitButton.disabled = false;
+            buttonText.classList.remove('d-none');
+            spinner.classList.add('d-none');
+          }
+        });
+      </script>
+    </th:block>
+  </body>
+</html>

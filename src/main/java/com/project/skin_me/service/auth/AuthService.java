@@ -19,6 +19,7 @@ import com.project.skin_me.response.JwtResponse;
 import com.project.skin_me.security.jwt.JwtUtils;
 import com.project.skin_me.security.user.ShopUserDetails;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class AuthService implements IAuthService {
 
     @Override
     @Transactional
-    public ResponseEntity<ApiResponse> login(LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse> login(LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         try {
             logger.debug("Attempting login for email: {}", loginRequest.getEmail());
             Authentication authentication = authenticationManager.authenticate(
@@ -78,7 +79,9 @@ public class AuthService implements IAuthService {
             String jwt = jwtUtils.generateTokenForUser(authentication);
             ShopUserDetails userDetails = (ShopUserDetails) authentication.getPrincipal();
 
-            recordLogin(userDetails.getId());
+            // Get IP address from request
+            String ipAddress = getClientIpAddress(request);
+            recordLogin(userDetails.getId(), ipAddress);
 
             Set<String> roles = userDetails.getAuthorities().stream()
                     .map(a -> a.getAuthority())
@@ -110,7 +113,7 @@ public class AuthService implements IAuthService {
 
     @Override
     @Transactional
-    public ResponseEntity<ApiResponse> googleLogin(String code, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse> googleLogin(String code, HttpServletRequest request, HttpServletResponse response) {
         try {
             logger.debug("Processing Google OAuth2 login with code: {}", code);
             GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
@@ -156,7 +159,8 @@ public class AuthService implements IAuthService {
                     userDetails, null, userDetails.getAuthorities());
             String jwt = jwtUtils.generateTokenForUser(authentication);
 
-            recordLogin(user.getId());
+            String ipAddress = getClientIpAddress(request);
+            recordLogin(user.getId(), ipAddress);
 
             Cookie cookie = new Cookie("token", jwt);
             cookie.setHttpOnly(true);
@@ -332,10 +336,20 @@ public class AuthService implements IAuthService {
 
     @Transactional
     public void recordLogin(Long userId) {
+        recordLogin(userId, null);
+    }
+
+    @Transactional
+    public void recordLogin(Long userId, String ipAddress) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            user.setLastLogin(LocalDateTime.now());
+            LocalDateTime now = LocalDateTime.now();
+            user.setLastLogin(now);
+            user.setLastActivity(now);
+            if (ipAddress != null && !ipAddress.isEmpty()) {
+                user.setLastIpAddress(ipAddress);
+            }
             logger.debug("Before setting isOnline to true for user ID: {}, current isOnline: {}", userId,
                     user.isOnline());
             user.setIsOnline(true);
@@ -346,11 +360,11 @@ public class AuthService implements IAuthService {
             Activity activity = new Activity();
             activity.setUser(user);
             activity.setActivityType(ActivityType.LOGIN);
-            activity.setTimestamp(LocalDateTime.now());
-            activity.setDetails("User logged in");
+            activity.setTimestamp(now);
+            activity.setDetails("User logged in from IP: " + (ipAddress != null ? ipAddress : "unknown"));
             activityRepository.save(activity);
 
-            logger.info("Login recorded for user ID: {}", userId);
+            logger.info("Login recorded for user ID: {} from IP: {}", userId, ipAddress);
         } else {
             logger.error("User not found with ID: {}", userId);
             throw new RuntimeException("User not found with ID: " + userId);
@@ -365,6 +379,7 @@ public class AuthService implements IAuthService {
             logger.debug("Before setting isOnline to false for user ID: {}, current isOnline: {}", userId,
                     user.isOnline());
             user.setIsOnline(false);
+            user.setLastIpAddress(null); // Clear IP on logout
             logger.debug("After setting isOnline to false for user ID: {}", userId);
             userRepository.save(user);
             logger.debug("User saved with isOnline: {} for user ID: {}", user.isOnline(), userId);
@@ -381,6 +396,33 @@ public class AuthService implements IAuthService {
             logger.error("User not found with ID: {}", userId);
             throw new RuntimeException("User not found with ID: " + userId);
         }
+    }
+
+    /**
+     * Get client IP address from HttpServletRequest
+     */
+    public String getClientIpAddress(HttpServletRequest request) {
+        if (request == null) {
+            return "unknown";
+        }
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("X-Real-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        // Handle multiple IPs (X-Forwarded-For can contain multiple IPs)
+        if (ipAddress != null && ipAddress.contains(",")) {
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        return ipAddress != null ? ipAddress : "unknown";
     }
 
     @Transactional

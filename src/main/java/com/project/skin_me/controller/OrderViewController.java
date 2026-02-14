@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Controller
+// @Controller - Disabled: Routes consolidated into PageController
 @RequiredArgsConstructor
 @RequestMapping("/view/orders")
 public class OrderViewController {
@@ -24,14 +24,23 @@ public class OrderViewController {
     private final IUserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public String getAllOrders(Model model) {
         try {
             List<OrderDto> orderDtos = orderService.getAllUserOrders();
 
+            long completedCount = orderDtos.stream()
+                    .filter(o -> o.getOrderStatus() != null && o.getOrderStatus().toString().equals("COMPLETED"))
+                    .count();
+            long pendingCount = orderDtos.stream()
+                    .filter(o -> o.getOrderStatus() != null && o.getOrderStatus().toString().equals("PAYMENT_PENDING"))
+                    .count();
+
             model.addAttribute("orders", orderDtos);
             model.addAttribute("pageTitle", "All Orders");
             model.addAttribute("totalOrders", orderDtos.size());
+            model.addAttribute("completedOrders", completedCount);
+            model.addAttribute("pendingOrders", pendingCount);
         } catch (Exception e) {
             model.addAttribute("error", "Failed to load orders: " + e.getMessage());
         }

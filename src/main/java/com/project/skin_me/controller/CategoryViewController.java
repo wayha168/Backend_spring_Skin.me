@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Controller
+// @Controller - Disabled: Routes consolidated into PageController
 @RequiredArgsConstructor
 @RequestMapping("/view/categories")
 public class CategoryViewController {
@@ -20,7 +20,7 @@ public class CategoryViewController {
     private final ICategoryService categoryService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public String getAllCategories(Model model) {
         try {
             List<Category> categories = categoryService.getAllCategories();
@@ -33,7 +33,7 @@ public class CategoryViewController {
     }
 
     @GetMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public String getCategoryById(@PathVariable Long categoryId, Model model) {
         try {
             Category category = categoryService.getCategoryById(categoryId);

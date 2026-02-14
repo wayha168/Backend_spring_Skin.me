@@ -2,6 +2,7 @@ package com.project.skin_me.request;
 
 import java.math.BigDecimal;
 
+import com.project.skin_me.enums.ProductStatus;
 import com.project.skin_me.model.Category;
 
 import lombok.Data;
@@ -17,4 +18,5 @@ public class ProductUpdateRequest {
     private String description;
     private String howToUse;
     private Category category;
+    private ProductStatus status;
 }

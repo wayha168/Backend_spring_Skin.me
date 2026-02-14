@@ -1,79 +1,86 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  lang="en"
+  th:replace="app :: layout(~{::main}, ~{::style}, ~{::script})"
+>
   <head>
+    <th:block th:fragment="style">
+      <link rel="stylesheet" href="/css/common.css" />
+      <link rel="stylesheet" href="/css/cards.css" />
+    </th:block>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title th:text="${pageTitle ?: 'Products by Category'}">Products by Category</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
-    />
-    <link rel="stylesheet" href="/css/common.css" />
-    <link rel="stylesheet" href="/css/cards.css" />
   </head>
   <body>
-    <div th:include="components/sidebar :: sidebar"></div>
+    <th:block th:fragment="main">
+    <main class="main-content">
+      <th:block th:with="icon=${pageIcon != null ? pageIcon : 'bi-box-seam'}, title=${pageTitle != null ? pageTitle : 'Products by Category'}">
+        <div th:replace="components/page-header :: page-header" th:with="pageIcon=${icon}, pageTitle=${title}"></div>
+      </th:block>
+      
+      <div class="container-fluid px-4 mb-2">
+        <a th:href="@{/views/categories}" class="btn btn-light btn-sm">
+          <i class="bi bi-arrow-left"></i> Back to Categories
+        </a>
+      </div>
 
-    <div class="page-header">
-      <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center">
-          <h1 class="mb-0">
-            <i class="bi bi-box-seam"></i>
-            <span th:text="${category.name}">Category</span> Products
-          </h1>
-          <a href="/categories" class="btn btn-light btn-sm">
-            <i class="bi bi-arrow-left"></i> Back to Categories
-          </a>
+      <div class="container-fluid px-4">
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-      </div>
-    </div>
 
-    <div class="container-fluid px-4">
-      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-
-      <div th:if="${#lists.isEmpty(products)}" class="card mt-4">
-        <div class="empty-state">
-          <i class="bi bi-inbox"></i>
-          <h5>No Products Found</h5>
-          <p th:text="'No products available in ' + ${category.name}">No products in this category.</p>
+        <div th:if="${category != null and #lists.isEmpty(products)}" class="card mt-4">
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h5>No Products Found</h5>
+            <p th:text="'No products available in ' + ${category.name}">No products in this category.</p>
+          </div>
         </div>
-      </div>
 
-      <div th:unless="${#lists.isEmpty(products)}" class="row g-4 mb-5 mt-2">
-        <div th:each="product : ${products}" class="col-lg-3 col-md-6">
-          <div class="card product-card h-100">
-            <div class="product-image-placeholder">
-              <i class="bi bi-box"></i>
-            </div>
-            <div class="product-body">
-              <h6 class="product-name" th:text="${product.name}">Product Name</h6>
-              <p class="product-brand" th:text="${product.brand}">Brand</p>
-              <div class="product-price" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">
-                $0.00
+        <div th:if="${category == null}" class="card mt-4">
+          <div class="empty-state">
+            <i class="bi bi-exclamation-triangle"></i>
+            <h5>Category Not Found</h5>
+            <p>The requested category could not be found.</p>
+          </div>
+        </div>
+
+        <div th:unless="${category == null or #lists.isEmpty(products)}" class="row g-4 mb-5 mt-2">
+          <div th:each="product : ${products}" class="col-lg-3 col-md-6">
+            <div class="card product-card h-100">
+              <div class="product-image-placeholder">
+                <i class="bi bi-box"></i>
               </div>
+              <div class="product-body">
+                <h6 class="product-name" th:text="${product.name}">Product Name</h6>
+                <p class="product-brand" th:text="${product.brand}">Brand</p>
+                <div class="product-price" th:text="'$' + ${#numbers.formatDecimal(product.price != null ? product.price : 0, 1, 2)}">
+                  $0.00
+                </div>
 
-              <div
-                th:class="'inventory-badge ' + (${product.inventory} > 0 ? 'inventory-ok' : 'inventory-low')"
-              >
-                <i class="bi bi-box-seam"></i>
-                <span th:text="${product.inventory} + ' in stock'">Stock</span>
-              </div>
+                <div
+                  th:class="'inventory-badge ' + (${product.inventory != null and product.inventory > 0 ? 'inventory-ok' : 'inventory-low')"
+                >
+                  <i class="bi bi-box-seam"></i>
+                  <span th:text="(${product.inventory != null ? product.inventory : 0}) + ' in stock'">Stock</span>
+                </div>
 
-              <div class="d-grid gap-2">
-                <a th:href="'/view/products/' + ${product.id}" class="btn btn-sm btn-gradient">
-                  <i class="bi bi-eye"></i> View Details
-                </a>
+                <div class="d-grid gap-2">
+                  <a th:href="@{/view/products/{id}(id=${product.id})}" class="btn btn-sm btn-gradient">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+    </main>
+    </th:block>
+    <th:block th:fragment="script">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </th:block>
 </html>

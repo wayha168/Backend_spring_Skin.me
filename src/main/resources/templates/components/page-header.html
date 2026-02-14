@@ -1,0 +1,67 @@
+<div th:fragment="page-header" class="page-header">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center">
+      <h1 class="mb-0">
+        <i class="bi" th:classappend="${pageIcon != null and pageIcon != '' ? pageIcon : 'bi-file-earmark'}"></i>
+        <span th:text="${pageTitle ?: 'Page'}">Page Title</span>
+      </h1>
+      
+      <div class="d-flex align-items-center gap-2">
+        <!-- Profile Dropdown -->
+        <div class="dropdown" th:if="${currentUser != null}">
+        <button 
+          class="btn btn-profile dropdown-toggle" 
+          type="button" 
+          id="profileDropdown" 
+          data-bs-toggle="dropdown" 
+          aria-expanded="false"
+        >
+          <i class="bi bi-person-circle"></i>
+          <span class="profile-name">
+            <span th:if="${currentUser.firstName != null}" th:text="${currentUser.firstName}">User</span>
+            <span th:unless="${currentUser.firstName != null}">Profile</span>
+          </span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end profile-dropdown" aria-labelledby="profileDropdown">
+          <li>
+            <div class="dropdown-header profile-header">
+              <div class="profile-info">
+                <div class="profile-name-display">
+                  <span th:if="${currentUser.firstName != null}" th:text="${currentUser.firstName}">First</span>
+                  <span th:if="${currentUser.firstName != null and currentUser.lastName != null}"> </span>
+                  <span th:if="${currentUser.lastName != null}" th:text="${currentUser.lastName}">Last</span>
+                  <span th:if="${currentUser.firstName == null and currentUser.lastName == null}">User</span>
+                </div>
+                <div class="profile-email" th:text="${currentUser.email}">email@example.com</div>
+              </div>
+            </div>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showToast('Feature coming soon!', 'info');">
+              <i class="bi bi-person"></i> My Profile
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showToast('Feature coming soon!', 'info');">
+              <i class="bi bi-gear"></i> Settings
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a 
+              class="dropdown-item text-danger" 
+              href="#"
+              onclick="handleLogout(event);"
+            >
+              <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+          </li>
+        </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
