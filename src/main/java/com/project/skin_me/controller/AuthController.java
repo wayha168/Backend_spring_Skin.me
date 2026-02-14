@@ -4,6 +4,7 @@ import com.project.skin_me.request.LoginRequest;
 import com.project.skin_me.request.SignupRequest;
 import com.project.skin_me.response.ApiResponse;
 import com.project.skin_me.service.auth.IAuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(
             @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request,
             HttpServletResponse response) {
-        return authService.login(loginRequest, response);
+        return authService.login(loginRequest, request, response);
     }
 
     @PostMapping("/signup")
@@ -46,8 +48,9 @@ public class AuthController {
 
     @PostMapping("/google")
     public ResponseEntity<ApiResponse> googleLogin(
-            @RequestBody Map<String, String> request,
+            @RequestBody Map<String, String> requestBody,
+            HttpServletRequest request,
             HttpServletResponse response) {
-        return authService.googleLogin(request.get("code"), response);
+        return authService.googleLogin(requestBody.get("code"), request, response);
     }
 }

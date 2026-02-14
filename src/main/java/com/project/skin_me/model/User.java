@@ -49,6 +49,12 @@ public class User {
         @JsonProperty("isOnline")
         private boolean isOnline = false;
 
+        @Column(name = "last_ip_address")
+        private String lastIpAddress;
+
+        @Column(name = "last_activity")
+        private LocalDateTime lastActivity;
+
         @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
         private Cart cart;
 

@@ -95,7 +95,7 @@ public class ProductService implements IProductService {
 
     @Override
     public List<Product> getAllProducts() {
-        return productRepository.findAllWithImages(); // ← FETCH IMAGES
+        return productRepository.findAllWithCategory(); // Optimized: fetch category to avoid N+1
     }
 
     public List<Product> getAllProductsWithoutImages() {
@@ -133,14 +133,28 @@ public class ProductService implements IProductService {
         existingProduct.setDescription(request.getDescription());
         existingProduct.setHowToUse(request.getHowToUse());
 
-        Category category = categoryRepository.findByname(request.getCategory().getName());
-        existingProduct.setCategory(category);
+        if (request.getCategory() != null) {
+            Category category = categoryRepository.findByname(request.getCategory().getName());
+            if (category == null && request.getCategory().getId() != null) {
+                category = categoryRepository.findById(request.getCategory().getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            }
+            if (category != null) {
+                existingProduct.setCategory(category);
+            }
+        }
+
+        if (request.getStatus() != null) {
+            existingProduct.setStatus(request.getStatus());
+        }
+
         return existingProduct;
     }
 
     @Override
     public List<Product> getAllProductsByCategory(String category) {
-        return productRepository.findByCategory_Name(category);
+        // Use optimized query with JOIN FETCH to avoid N+1 issues
+        return productRepository.findByCategoryNameWithCategory(category);
     }
 
     @Override

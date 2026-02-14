@@ -15,10 +15,14 @@ public class CheckoutService implements ICheckoutService {
     @Override
     public Session createCheckoutSession(Long orderId, Long amountCents) throws StripeException {
         SessionCreateParams params = SessionCreateParams.builder()
+                // Enable card payment method - Stripe Checkout Session automatically provides card input form
+                // When CARD payment method type is added, Stripe displays a secure card input form
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(frontendUrl + "/payment-success?orderId=" + orderId)
                 .setCancelUrl(frontendUrl + "/payment-cancel?orderId=" + orderId)
+                // Enable billing address collection for card payments
+                .setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.AUTO)
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
                                 .setQuantity(1L)

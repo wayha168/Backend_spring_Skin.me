@@ -80,12 +80,15 @@ public class UserService implements IUserService {
 
         // 4. Role handling
         Role role;
-        if (request.getRole() != null && request.getRole().getName() != null) {
-            role = roleRepository.findByName(request.getRole().getName())
+        final String roleName;
+        if (request.getRole() != null && request.getRole().getName() != null && !request.getRole().getName().isEmpty()) {
+            roleName = request.getRole().getName();
+            role = roleRepository.findByName(roleName)
                     .orElseThrow(() -> new IllegalArgumentException(
-                            "Role not found: " + request.getRole().getName()));
+                            "Role not found: " + roleName));
         } else {
-            role = roleRepository.findByName("ROLE_USER")
+            roleName = "ROLE_USER";
+            role = roleRepository.findByName(roleName)
                     .orElseThrow(() -> new RuntimeException("Default role ROLE_USER not found."));
         }
         newUser.setRoles(new HashSet<>(Collections.singletonList(role)));
@@ -136,10 +139,71 @@ public class UserService implements IUserService {
     @Transactional
     public User updateUser(UserUpdateRequest request, Long userId) {
         return userRepository.findById(userId).map(existingUser -> {
-            existingUser.setFirstName(request.getFirstName());
-            existingUser.setLastName(request.getLastName());
+            if (request.getFirstName() != null) {
+                existingUser.setFirstName(request.getFirstName());
+            }
+            if (request.getLastName() != null) {
+                existingUser.setLastName(request.getLastName());
+            }
+            if (request.getEmail() != null) {
+                // Check if email is already taken by another user
+                if (!existingUser.getEmail().equals(request.getEmail()) && 
+                    userRepository.existsByEmail(request.getEmail())) {
+                    throw new AlreadyExistsException("Email already exists: " + request.getEmail());
+                }
+                existingUser.setEmail(request.getEmail());
+            }
+            if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
+            }
+            if (request.getEnabled() != null) {
+                existingUser.setEnabled(request.getEnabled());
+            }
             return userRepository.save(existingUser);
         }).orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+    }
+
+    @Override
+    @Transactional
+    public User assignRole(Long userId, String roleName) {
+        User user = getUserById(userId);
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
+        
+        if (user.getRoles() == null) {
+            user.setRoles(new HashSet<>());
+        }
+        user.getRoles().add(role);
+        
+        Activity activity = new Activity();
+        activity.setUser(user);
+        activity.setActivityType(ActivityType.REGISTER);
+        activity.setTimestamp(LocalDateTime.now());
+        activity.setDetails("Role " + roleName + " assigned to user: " + user.getEmail());
+        activityRepository.save(activity);
+        
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User removeRole(Long userId, String roleName) {
+        User user = getUserById(userId);
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
+        
+        if (user.getRoles() != null) {
+            user.getRoles().remove(role);
+        }
+        
+        Activity activity = new Activity();
+        activity.setUser(user);
+        activity.setActivityType(ActivityType.REGISTER);
+        activity.setTimestamp(LocalDateTime.now());
+        activity.setDetails("Role " + roleName + " removed from user: " + user.getEmail());
+        activityRepository.save(activity);
+        
+        return userRepository.save(user);
     }
 
     @Override

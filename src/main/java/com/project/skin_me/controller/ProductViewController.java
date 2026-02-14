@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Controller
+// @Controller - Disabled: Routes consolidated into PageController
 @RequiredArgsConstructor
 @RequestMapping("/view/products")
 public class ProductViewController {
@@ -24,7 +24,7 @@ public class ProductViewController {
     private final ICategoryService categoryService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public String getAllProducts(Model model) {
         try {
             List<Product> products = productService.getAllProducts();
@@ -41,7 +41,7 @@ public class ProductViewController {
     }
 
     @GetMapping("/{productId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public String getProductById(@PathVariable Long productId, Model model) {
         try {
             Product product = productService.getProductById(productId);

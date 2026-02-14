@@ -30,6 +30,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsByNameAndBrand(String name, String brand);
 
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images")
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images LEFT JOIN FETCH p.category")
     List<Product> findAllWithImages();
+
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category")
+    List<Product> findAllWithCategory();
+
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE p.category.name = :categoryName")
+    List<Product> findByCategoryNameWithCategory(String categoryName);
 }
